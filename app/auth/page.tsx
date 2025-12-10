@@ -1,10 +1,10 @@
-import MainPage from '@/components/main-page/mainpage'
+import AuthPage from '@/components/login&register/AuthPage'
 import React from 'react'
 
 const page = () => {
   return (
-    <div >
-      <MainPage/>
+    <div>
+      <AuthPage/>
     </div>
   )
 }
