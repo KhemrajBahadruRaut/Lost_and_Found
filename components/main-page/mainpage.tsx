@@ -333,7 +333,7 @@ export default function MainPage() {
                 <h3 className="text-xl font-bold text-gray-900 mb-2 flex items-center">
                   {feature.title}
                   {activeFeature === index && (
-                    <span className="ml-3 px-3 py-1 text-xs font-semibold rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow">
+                    <span className="ml-3 px-3 py-1 text-xs font-semibold rounded-full bg-linear-to-r from-blue-600 to-indigo-600 text-white shadow">
                       Active
                     </span>
                   )}
@@ -349,7 +349,7 @@ export default function MainPage() {
             </div>
 
             {activeFeature === index && (
-              <div className="absolute bottom-0 left-0 right-0 h-1 rounded-b-2xl bg-gradient-to-r from-blue-600 to-indigo-600"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-1 rounded-b-2xl bg-linear-to-r from-blue-600 to-indigo-600"></div>
             )}
           </motion.div>
         ))}
@@ -361,7 +361,7 @@ export default function MainPage() {
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.3 }}
-        className="rounded-3xl p-12 shadow-xl border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50"
+        className="rounded-3xl p-12 shadow-xl border border-blue-100 bg-linear-to-br from-blue-50 to-indigo-50"
       >
         <div className="text-center">
 
@@ -460,7 +460,7 @@ export default function MainPage() {
       {/* Security & Trust */}
     <section className="relative z-10 py-20">
   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div className="bg-gradient-to-r from-blue-700 via-indigo-700 to-indigo-800 rounded-3xl p-12 text-white shadow-2xl">
+    <div className="bg-linear-to-r from-blue-700 via-indigo-700 to-indigo-800 rounded-3xl p-12 text-white shadow-2xl">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
         
         {/* Left Content */}

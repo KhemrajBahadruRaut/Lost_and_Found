@@ -19,41 +19,41 @@ export default function PostLostPage() {
     reward: '',
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      const token = localStorage.getItem('token');
-      
-      const formDataToSend = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        if (value !== null && value !== '') {
-          formDataToSend.append(key, value as any);
-        }
-      });
-
-      const response = await fetch('/api/posts/lost', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formDataToSend,
-      });
-
-      if (response.ok) {
-        alert('Lost item reported successfully!');
-        router.push('/dashboard');
-      } else {
-        throw new Error('Failed to post');
+  try {
+    const formDataToSend = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      if (value !== null && value !== '') {
+        formDataToSend.append(key, value as any);
       }
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Failed to post lost item. Please try again.');
-    } finally {
-      setLoading(false);
+    });
+
+    const response = await fetch('http://localhost/lost_and_found_backend/report/report_lost.php', {
+      method: 'POST',
+      body: formDataToSend,
+      credentials: 'include', // ✅ send cookies for session authentication
+      // remove headers for FormData!
+    });
+
+    if (response.ok) {
+      alert('Lost item reported successfully!');
+      router.push('/dashboard');
+    } else if (response.status === 401) {
+      alert('You are not logged in. Please log in first.');
+      router.push('/auth');
+    } else {
+      throw new Error('Failed to post');
     }
-  };
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Failed to post lost item. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({

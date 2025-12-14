@@ -25,11 +25,24 @@ export default function Navbar() {
   }
 }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  const handleLogout = async () => {
+  try {
+    // hit backend logout so PHP session ends
+    await fetch('http://localhost/lost_and_found_backend/auth/logout.php', {
+      method: 'POST',
+      credentials: 'include', // IMPORTANT: sends PHPSESSID
+    });
+
+    // clear local values (if any)
+    localStorage.clear();
+
+    // redirect
     router.push('/');
-  };
+  } catch (error) {
+    console.error("Logout error:", error);
+  }
+};
+
 
   return (
     <nav className="bg-white shadow-sm border-b">

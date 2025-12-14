@@ -33,7 +33,7 @@ export default function PostFoundPage() {
         }
       });
 
-      const response = await fetch('/api/posts/found', {
+      const response = await fetch('', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

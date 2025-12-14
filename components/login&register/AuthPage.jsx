@@ -1,8 +1,11 @@
 "use client"
 import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function AuthPage() {
-  const [view, setView] = useState('login'); // 'login', 'signup', 'forgot', 'verify', 'reset'
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [view, setView] = useState('login'); 
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -143,6 +146,7 @@ export default function AuthPage() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Added for cookie support
         body: JSON.stringify(formData)
       });
 
@@ -182,6 +186,7 @@ export default function AuthPage() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Added for cookie support
         body: JSON.stringify({
           email: pendingEmail,
           code: formData.verificationCode
@@ -230,7 +235,11 @@ export default function AuthPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData)
+        credentials: 'include', // CRITICAL: This allows cookies to be set
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        })
       });
 
       const data = await response.json();
@@ -238,14 +247,20 @@ export default function AuthPage() {
       if (data.success) {
         setSuccess(data.message);
         setErrors({});
-        // Redirect to dashboard or home page
+        
+        // Use Next.js router instead of window.location
+        const redirect = searchParams.get('redirect') || '/dashboard';
+        
+        // Small delay to show success message
         setTimeout(() => {
-          window.location.href = '/dashboard';
-        }, 1500);
+          router.push(redirect);
+          router.refresh(); // Force refresh to update middleware
+        }, 1000);
       } else {
         setErrors({ submit: data.message });
       }
     } catch (error) {
+      console.error('Login error:', error);
       setErrors({ submit: 'Network error. Please try again.' });
     } finally {
       setLoading(false);
@@ -269,6 +284,7 @@ export default function AuthPage() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Added for cookie support
         body: JSON.stringify({ email: formData.email })
       });
 
@@ -317,6 +333,7 @@ export default function AuthPage() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Added for cookie support
         body: JSON.stringify({
           email: pendingEmail,
           code: formData.verificationCode,

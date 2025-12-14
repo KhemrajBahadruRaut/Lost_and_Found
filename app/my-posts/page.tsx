@@ -26,16 +26,17 @@ export default function MyPostsPage() {
 
   const fetchMyPosts = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/posts/my-posts', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      const response = await fetch('http://localhost/lost_and_found_backend/posts/my_posts.php', {
+        credentials: 'include', // ✅ send PHPSESSID/auth_token cookies
       });
+
+      if (!response.ok) throw new Error('Failed to fetch posts');
+
       const data = await response.json();
       setPosts(data);
     } catch (error) {
       console.error('Error fetching posts:', error);
+      alert('Failed to load your posts.');
     } finally {
       setLoading(false);
     }
@@ -45,50 +46,45 @@ export default function MyPostsPage() {
     if (!confirm('Are you sure you want to delete this post?')) return;
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/posts/${postId}`, {
+      const response = await fetch(`http://localhost/lost_and_found_backend/posts/delete_post.php?id=${postId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        credentials: 'include',
       });
 
       if (response.ok) {
         setPosts(posts.filter(post => post.id !== postId));
         alert('Post deleted successfully');
+      } else {
+        throw new Error('Delete failed');
       }
     } catch (error) {
       console.error('Error deleting post:', error);
+      alert('Failed to delete post');
     }
   };
 
   const handleMarkResolved = async (postId: string) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/posts/${postId}/resolve`, {
+      const response = await fetch(`http://localhost/lost_and_found_backend/posts/mark_resolved.php?id=${postId}`, {
         method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+        credentials: 'include',
       });
 
       if (response.ok) {
         setPosts(posts.map(post => 
-          post.id === postId 
-            ? { ...post, status: 'resolved' as const }
-            : post
+          post.id === postId ? { ...post, status: 'resolved' as const } : post
         ));
         alert('Post marked as resolved');
+      } else {
+        throw new Error('Failed to mark resolved');
       }
     } catch (error) {
       console.error('Error:', error);
+      alert('Failed to mark post as resolved');
     }
   };
 
-  const filteredPosts = posts.filter(post => 
-    activeTab === 'all' || post.type === activeTab
-  );
+  const filteredPosts = posts.filter(post => activeTab === 'all' || post.type === activeTab);
 
   const stats = {
     total: posts.length,
@@ -107,7 +103,7 @@ export default function MyPostsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 ">
-        <Navbar/>
+      <Navbar/>
       <div className="max-w-7xl mx-auto px-4 pt-10 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">My Posts</h1>
@@ -194,9 +190,7 @@ export default function MyPostsPage() {
                         }`}>
                           {post.status.toUpperCase()}
                         </span>
-                        <span className="text-sm text-gray-500">
-                          {post.date}
-                        </span>
+                        <span className="text-sm text-gray-500">{post.date}</span>
                       </div>
                       
                       <h3 className="text-lg font-semibold mt-2">{post.title}</h3>
@@ -222,10 +216,7 @@ export default function MyPostsPage() {
                         <CheckCircle size={18} />
                       </button>
                       
-                      <button
-                        className="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200"
-                        title="Edit"
-                      >
+                      <button className="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200" title="Edit">
                         <Edit size={18} />
                       </button>
                       

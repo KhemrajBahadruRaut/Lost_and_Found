@@ -1,5 +1,4 @@
 'use client';
-
 import { useEffect, useState } from 'react';
 import { Search, Filter } from 'lucide-react';
 
@@ -31,7 +30,7 @@ export default function DashboardPage() {
   const fetchPosts = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/posts', {
+      const response = await fetch('', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
