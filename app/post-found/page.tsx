@@ -21,7 +21,7 @@ const Toast = ({ message, type, onClose }: { message: string; type: 'success' | 
             : 'bg-rose-50 border-rose-200 text-rose-800'
         } min-w-[320px] max-w-md`}
       >
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           {type === 'success' ? (
             <div className="bg-emerald-500 rounded-full p-1">
               <CheckCircle size={24} className="text-white" />
@@ -37,7 +37,7 @@ const Toast = ({ message, type, onClose }: { message: string; type: 'success' | 
         </div>
         <button
           onClick={onClose}
-          className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+          className="shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
         >
           <X size={18} />
         </button>
@@ -634,7 +634,7 @@ export default function PostFoundPage() {
                   <span className="text-sm text-gray-600">Clear photos greatly help identification</span>
                 </li>
                 <li className="flex items-start">
-                  <div className="flex-shrink-0 w-5 h-5 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                  <div className="shrink-0 w-5 h-5 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mr-3 mt-0.5">
                     <span className="text-xs font-semibold">4</span>
                   </div>
                   <span className="text-sm text-gray-600">Specify where you're keeping the item</span>
