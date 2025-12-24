@@ -26,8 +26,8 @@ export default function MyPostsPage() {
 
   const fetchMyPosts = async () => {
     try {
-      const response = await fetch('http://localhost/lost_and_found_backend/posts/my_posts.php', {
-        credentials: 'include', // ✅ send PHPSESSID/auth_token cookies
+      const response = await fetch('http://localhost/lost_and_found_backend/posts/my_posts/my_posts.php', {
+        credentials: 'include', 
       });
 
       if (!response.ok) throw new Error('Failed to fetch posts');
@@ -46,7 +46,7 @@ export default function MyPostsPage() {
     if (!confirm('Are you sure you want to delete this post?')) return;
 
     try {
-      const response = await fetch(`http://localhost/lost_and_found_backend/posts/delete_post.php?id=${postId}`, {
+      const response = await fetch(`http://localhost/lost_and_found_backend/posts/my_posts/delete_post.php?id=${postId}`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -65,7 +65,7 @@ export default function MyPostsPage() {
 
   const handleMarkResolved = async (postId: string) => {
     try {
-      const response = await fetch(`http://localhost/lost_and_found_backend/posts/mark_resolved.php?id=${postId}`, {
+      const response = await fetch(`http://localhost/lost_and_found_backend/posts/my_posts/mark_resolved.php?id=${postId}`, {
         method: 'PUT',
         credentials: 'include',
       });

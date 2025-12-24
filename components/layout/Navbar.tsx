@@ -30,7 +30,7 @@ export default function Navbar() {
     // hit backend logout so PHP session ends
     await fetch('http://localhost/lost_and_found_backend/auth/logout.php', {
       method: 'POST',
-      credentials: 'include', // IMPORTANT: sends PHPSESSID
+      credentials: 'include', 
     });
 
     // clear local values (if any)
