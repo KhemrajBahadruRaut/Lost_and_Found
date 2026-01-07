@@ -81,7 +81,7 @@ export interface Match {
     }
   };
   matchScore: number;
-  status: 'pending' | 'confirmed' | 'rejected';
+  status: 'pending' | 'pending_approval' | 'confirmed' | 'rejected';
   createdAt: string;
 }
 

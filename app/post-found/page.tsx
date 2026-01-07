@@ -202,7 +202,9 @@ export default function PostFoundPage() {
         credentials: 'include',
       });
 
-      if (response.ok) {
+      const data = await response.json();
+
+      if (response.ok && data.success) {
         setToast({
           message: 'Found item reported successfully! Thank you for helping reunite items with their owners.',
           type: 'success'
@@ -214,7 +216,7 @@ export default function PostFoundPage() {
           type: 'error'
         });
       } else {
-        throw new Error('Failed to post');
+        throw new Error(data.error || data.message || 'Failed to post');
       }
     } catch (error) {
       console.error('Error:', error);

@@ -26,7 +26,7 @@ interface Match {
   lostPost: Post;
   foundPost: Post;
   matchScore: number;
-  status: 'pending' | 'confirmed' | 'rejected';
+  status: 'pending' | 'pending_approval' | 'confirmed' | 'rejected';
   createdAt: string;
 }
 
@@ -34,7 +34,7 @@ export default function Matches() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'confirmed' | 'rejected'>('all');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'pending_approval' | 'confirmed' | 'rejected'>('all');
 
   useEffect(() => {
     fetchMatches();
@@ -66,8 +66,17 @@ export default function Matches() {
   };
 
   const handleMatchAction = async (matchId: string, action: 'confirmed' | 'rejected') => {
+    // Show confirmation dialog
+    const confirmMessage = action === 'confirmed' 
+      ? 'Are you sure you want to confirm this match?' 
+      : 'Are you sure this is not a match?';
+    
+    if (!confirm(confirmMessage)) {
+      return; // User cancelled
+    }
+
     try {
-      const response = await fetch(`http://localhost/lost_and_found_backend/matches/match_update.php`, {
+      const response = await fetch('http://localhost/lost_and_found_backend/matches/match_update.php', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -75,12 +84,18 @@ export default function Matches() {
       });
 
       if (response.ok) {
+        // Optimistic update
+        const newStatus = action === 'confirmed' ? 'pending_approval' : 'rejected';
+        
         setMatches(matches.map(match =>
-          match._id === matchId ? { ...match, status: action } : match
+          match._id === matchId ? { ...match, status: newStatus as any } : match
         ));
+      } else {
+        alert('Failed to update match status. Please try again.');
       }
     } catch (err) {
       console.error(err);
+      alert('An error occurred. Please try again.');
     }
   };
 
@@ -218,12 +233,42 @@ export default function Matches() {
                 {/* Action Buttons */}
                 {match.status === 'pending' && (
                   <div className="mt-6 flex gap-4 justify-center">
-                    <button onClick={() => handleMatchAction(match._id, 'confirmed')} className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">
+                    <button 
+                      onClick={() => handleMatchAction(match._id, 'confirmed')} 
+                      className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-colors"
+                    >
                       <CheckCircle size={20}/> Confirm Match
                     </button>
-                    <button onClick={() => handleMatchAction(match._id, 'rejected')} className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
+                    <button 
+                      onClick={() => handleMatchAction(match._id, 'rejected')} 
+                      className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors"
+                    >
                       <XCircle size={20}/> Not a Match
                     </button>
+                  </div>
+                )}
+                
+                {match.status === 'pending_approval' && (
+                  <div className="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-lg text-center">
+                    <p className="text-purple-800 font-medium">
+                      ✓ Your match is verifying. We will notify you after admin approval.
+                    </p>
+                  </div>
+                )}
+                
+                {match.status === 'confirmed' && (
+                  <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg text-center">
+                    <p className="text-green-800 font-medium">
+                      ✓ Match Confirmed by Admin
+                    </p>
+                  </div>
+                )}
+                
+                {match.status === 'rejected' && (
+                  <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg text-center">
+                    <p className="text-gray-600 font-medium">
+                      Match Rejected
+                    </p>
                   </div>
                 )}
               </div>

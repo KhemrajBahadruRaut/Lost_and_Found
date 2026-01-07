@@ -14,6 +14,8 @@ const MatchesTable: React.FC<MatchesTableProps> = ({
   onUpdateStatus,
   onGenerateMatches
 }) => {
+  const [selectedMatch, setSelectedMatch] = React.useState<Match | null>(null);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -38,7 +40,13 @@ const MatchesTable: React.FC<MatchesTableProps> = ({
             </div>
           ) : (
             matches.map((match) => (
-              <div key={match.id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+              <div key={match.id} className={`p-4 border rounded-lg hover:bg-gray-50 ${match.status === 'pending_approval' ? 'border-purple-300 bg-purple-50' : 'border-gray-200'}`}>
+                {match.status === 'pending_approval' && (
+                  <div className="mb-2 text-xs font-bold text-purple-700 uppercase tracking-wide flex items-center gap-2">
+                    <span className="w-2 h-2 bg-purple-600 rounded-full animate-pulse"></span>
+                    User Confirmed - Waiting for Approval
+                  </div>
+                )}
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-4">
                     <div className="text-center">
@@ -71,23 +79,29 @@ const MatchesTable: React.FC<MatchesTableProps> = ({
                     Generated on {new Date(match.createdAt).toLocaleDateString()}
                   </div>
                   <div className="flex items-center gap-2">
-                    {match.status === 'pending' && (
+                    {(match.status === 'pending' || match.status === 'pending_approval') && (
                       <>
                         <button
                           onClick={() => onUpdateStatus(match.id, 'confirmed')}
-                          className="px-3 py-1 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 text-sm"
+                          className="px-3 py-1 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 text-sm font-medium"
                         >
-                          Confirm Match
+                          Approve Match
                         </button>
                         <button
-                          onClick={() => onUpdateStatus(match.id, 'rejected')}
-                          className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-sm"
+                          onClick={() => {
+                              const reason = prompt("Enter rejection reason:");
+                              if (reason) onUpdateStatus(match.id, 'rejected'); // Pass reason if API supports it
+                          }}
+                          className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-sm font-medium"
                         >
                           Reject
                         </button>
                       </>
                     )}
-                    <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 text-sm">
+                    <button 
+                        onClick={() => setSelectedMatch(match)}
+                        className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 text-sm"
+                    >
                       Details
                     </button>
                   </div>
@@ -97,6 +111,72 @@ const MatchesTable: React.FC<MatchesTableProps> = ({
           )}
         </div>
       </div>
+
+        {/* Details Modal */}
+      {selectedMatch && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                <div className="flex justify-between items-center p-6 border-b">
+                    <h3 className="text-xl font-bold">Match Details</h3>
+                    <button onClick={() => setSelectedMatch(null)} className="text-gray-500 hover:text-gray-700">✕</button>
+                </div>
+                <div className="p-6 grid md:grid-cols-2 gap-8">
+                    {/* Lost Side */}
+                    <div className="space-y-4">
+                        <div className="font-bold text-lg text-red-600 border-b pb-2">Looking For (Lost)</div>
+                        {selectedMatch.lostPost.imageUrl && (
+                            <img src={selectedMatch.lostPost.imageUrl} className="w-full h-48 object-cover rounded-lg"/>
+                        )}
+                        <div>
+                            <span className="font-semibold block">Title:</span> {selectedMatch.lostPost.title}
+                        </div>
+                        <div>
+                            <span className="font-semibold block">Description:</span> {selectedMatch.lostPost.description}
+                        </div>
+                        <div>
+                            <span className="font-semibold block">Location:</span> {selectedMatch.lostPost.location}
+                        </div>
+                        <div>
+                            <span className="font-semibold block">Date:</span> {new Date(selectedMatch.lostPost.date).toLocaleDateString()}
+                        </div>
+                         <div className="bg-gray-50 p-3 rounded">
+                            <span className="font-semibold block text-sm">User Info:</span>
+                            <div className="text-sm">{selectedMatch.lostPost.user.name}</div>
+                            <div className="text-sm">{selectedMatch.lostPost.user.email}</div>
+                        </div>
+                    </div>
+
+                    {/* Found Side */}
+                    <div className="space-y-4">
+                        <div className="font-bold text-lg text-green-600 border-b pb-2">Found Item</div>
+                         {selectedMatch.foundPost.imageUrl && (
+                            <img src={selectedMatch.foundPost.imageUrl} className="w-full h-48 object-cover rounded-lg"/>
+                        )}
+                        <div>
+                            <span className="font-semibold block">Title:</span> {selectedMatch.foundPost.title}
+                        </div>
+                        <div>
+                            <span className="font-semibold block">Description:</span> {selectedMatch.foundPost.description}
+                        </div>
+                        <div>
+                            <span className="font-semibold block">Location:</span> {selectedMatch.foundPost.location}
+                        </div>
+                         <div>
+                            <span className="font-semibold block">Date:</span> {new Date(selectedMatch.foundPost.date).toLocaleDateString()}
+                        </div>
+                         <div className="bg-gray-50 p-3 rounded">
+                            <span className="font-semibold block text-sm">User Info:</span>
+                            <div className="text-sm">{selectedMatch.foundPost.user.name}</div>
+                            <div className="text-sm">{selectedMatch.foundPost.user.email}</div>
+                        </div>
+                    </div>
+                </div>
+                <div className="p-6 border-t bg-gray-50 flex justify-end gap-3">
+                    <button onClick={() => setSelectedMatch(null)} className="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">Close</button>
+                </div>
+            </div>
+        </div>
+      )}
     </div>
   );
 };

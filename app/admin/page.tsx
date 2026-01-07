@@ -301,6 +301,7 @@ const page: React.FC = () => {
           title={activeTab}
           onSearch={(value: string) => setSearchTerm(value)}
           onSearchSubmit={fetchData}
+          onNavigateToMatches={() => setActiveTab('matches')}
         />
         
         <div className="p-6">
