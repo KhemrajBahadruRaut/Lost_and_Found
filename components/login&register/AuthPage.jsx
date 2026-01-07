@@ -245,17 +245,17 @@ export default function AuthPage() {
       const data = await response.json();
 
       if (data.success) {
-        setSuccess(data.message);
-        setErrors({});
-        
-        // Use Next.js router instead of window.location
-        const redirect = searchParams.get('redirect') || '/dashboard';
-        
-        // Small delay to show success message
-        setTimeout(() => {
-          router.push(redirect);
-          router.refresh(); // Force refresh to update middleware
-        }, 1000);
+  const redirect =
+    data.type === 'admin'
+      ? '/admin/dashboard'
+      : '/dashboard';
+
+  setTimeout(() => {
+    router.push(redirect);
+    router.refresh();
+  }, 800);
+
+
       } else {
         setErrors({ submit: data.message });
       }
