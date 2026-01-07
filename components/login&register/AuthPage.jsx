@@ -245,9 +245,18 @@ export default function AuthPage() {
       const data = await response.json();
 
       if (data.success) {
+
+  if (data.token) {
+    localStorage.setItem('admin_token', data.token);
+    // Also save user info if available
+    if (data.user) {
+      localStorage.setItem('admin_user', JSON.stringify(data.user));
+    }
+  }
+
   const redirect =
     data.type === 'admin'
-      ? '/admin/dashboard'
+      ? '/admin'
       : '/dashboard';
 
   setTimeout(() => {

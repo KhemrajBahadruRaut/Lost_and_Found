@@ -603,25 +603,25 @@ export default function PostLostPage() {
               </h3>
               <ul className="space-y-3">
                 <li className="flex items-start">
-                  <div className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                  <div className="shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-3 mt-0.5">
                     <span className="text-xs font-semibold">1</span>
                   </div>
                   <span className="text-sm text-gray-600">Use descriptive titles (no numbers only)</span>
                 </li>
                 <li className="flex items-start">
-                  <div className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                  <div className="shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-3 mt-0.5">
                     <span className="text-xs font-semibold">2</span>
                   </div>
                   <span className="text-sm text-gray-600">Include unique identifying marks or features</span>
                 </li>
                 <li className="flex items-start">
-                  <div className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                  <div className="shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-3 mt-0.5">
                     <span className="text-xs font-semibold">3</span>
                   </div>
                   <span className="text-sm text-gray-600">Clear photos greatly improve recovery chances</span>
                 </li>
                 <li className="flex items-start">
-                  <div className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                  <div className="shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-3 mt-0.5">
                     <span className="text-xs font-semibold">4</span>
                   </div>
                   <span className="text-sm text-gray-600">Double-check contact information accuracy</span>
@@ -660,19 +660,19 @@ export default function PostLostPage() {
               </h3>
               <ul className="text-sm text-blue-700 space-y-2">
                 <li className="flex items-start">
-                  <div className="flex-shrink-0 mt-0.5">✓</div>
+                  <div className="fhrink-0 mt-0.5">✓</div>
                   <span className="ml-2">Must contain letters (minimum 5 characters)</span>
                 </li>
                 <li className="flex items-start">
-                  <div className="flex-shrink-0 mt-0.5">✓</div>
+                  <div className="shrink-0 mt-0.5">✓</div>
                   <span className="ml-2">Descriptive and clear (e.g., "Black Leather Wallet")</span>
                 </li>
                 <li className="flex items-start">
-                  <div className="flex-shrink-0 mt-0.5">✗</div>
+                  <div className="shrink-0 mt-0.5">✗</div>
                   <span className="ml-2">Cannot be only numbers (e.g., "12345")</span>
                 </li>
                 <li className="flex items-start">
-                  <div className="flex-shrink-0 mt-0.5">✗</div>
+                  <div className="shrink-0 mt-0.5">✗</div>
                   <span className="ml-2">Avoid vague titles (e.g., "Lost Item")</span>
                 </li>
               </ul>
