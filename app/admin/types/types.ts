@@ -81,7 +81,7 @@ export interface Match {
     }
   };
   matchScore: number;
-  status: 'pending' | 'pending_approval' | 'confirmed' | 'rejected';
+  status: 'matched' | 'pending' | 'pending_approval' | 'confirmed' | 'rejected';
   createdAt: string;
 }
 
@@ -90,7 +90,7 @@ export interface DashboardStats {
   totalUsers: number;
   totalLostItems: number;
   totalFoundItems: number;
-  pendingMatches: number;
+  totalMatches: number;
   activeLostItems: number;
   activeFoundItems: number;
   resolvedCases: number;

@@ -26,7 +26,7 @@ interface Match {
   lostPost: Post;
   foundPost: Post;
   matchScore: number;
-  status: 'pending' | 'pending_approval' | 'confirmed' | 'rejected';
+  status: 'matched' | 'pending' | 'confirmed' | 'rejected' | '';
   createdAt: string;
 }
 
@@ -34,7 +34,7 @@ export default function Matches() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'pending_approval' | 'confirmed' | 'rejected'>('all');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'confirmed' | 'rejected'>('all');
 
   useEffect(() => {
     fetchMatches();
@@ -85,7 +85,7 @@ export default function Matches() {
 
       if (response.ok) {
         // Optimistic update
-        const newStatus = action === 'confirmed' ? 'pending_approval' : 'rejected';
+        const newStatus = action === 'confirmed' ? 'pending' : 'rejected';
         
         setMatches(matches.map(match =>
           match._id === matchId ? { ...match, status: newStatus as any } : match
@@ -164,6 +164,7 @@ export default function Matches() {
                   <div className="flex items-center gap-3">
                     <span className="text-lg font-semibold text-blue-600">Match Score: {match.matchScore}%</span>
                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      match.status === 'matched' ? 'bg-blue-100 text-blue-800' :
                       match.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                       match.status === 'confirmed' ? 'bg-green-100 text-green-800' :
                       'bg-red-100 text-red-800'
@@ -231,7 +232,7 @@ export default function Matches() {
                 </div>
 
                 {/* Action Buttons */}
-                {match.status === 'pending' && (
+                {(match.status === 'matched' || match.status === '' || !match.status) && (
                   <div className="mt-6 flex gap-4 justify-center">
                     <button 
                       onClick={() => handleMatchAction(match._id, 'confirmed')} 
@@ -248,7 +249,7 @@ export default function Matches() {
                   </div>
                 )}
                 
-                {match.status === 'pending_approval' && (
+                {match.status === 'pending' && (
                   <div className="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-lg text-center">
                     <p className="text-purple-800 font-medium">
                       ✓ Your match is verifying. We will notify you after admin approval.

@@ -43,7 +43,7 @@ const page: React.FC = () => {
     totalUsers: 0,
     totalLostItems: 0,
     totalFoundItems: 0,
-    pendingMatches: 0,
+    totalMatches: 0,
     activeLostItems: 0,
     activeFoundItems: 0,
     resolvedCases: 0,

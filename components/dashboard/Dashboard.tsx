@@ -222,7 +222,7 @@ export default function DashboardPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-2 py-3">
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-3">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -243,7 +243,7 @@ export default function DashboardPage() {
             </div>
           </motion.div>
 
-          <motion.div 
+          {/* <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
@@ -251,7 +251,7 @@ export default function DashboardPage() {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Recovery  Rate</p>
+                <p className="text-sm font-medium text-gray-600">Recovery Rate</p>
                 <p className="text-3xl font-bold text-gray-900 mt-2">{stats.recoveryRate}%</p>
               </div>
               <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
@@ -262,9 +262,9 @@ export default function DashboardPage() {
               <ArrowUpRight size={16} className="text-green-500 mr-1" />
               <span className="text-green-600 font-medium">Industry leading</span>
             </div>
-          </motion.div>
+          </motion.div> */}
 
-          <motion.div 
+          {/* <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
@@ -283,15 +283,9 @@ export default function DashboardPage() {
               <Bell size={16} className="text-blue-500 mr-1" />
               <span className="text-blue-600 font-medium">+3 today</span>
             </div>
-          </motion.div>
-        </div>
-
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Posts Feed */}
-          <div className="lg:col-span-2">
-            {/* Search & Filter */}
-            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-6">
+          </motion.div> */}
+                  {/* Search & Filter */}
+            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 ">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex-1 relative">
                   <Search
@@ -342,6 +336,13 @@ export default function DashboardPage() {
                 ))}
               </div>
             </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Posts Feed */}
+          <div className="lg:col-span-2">
+    
 
             {/* Posts Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -491,59 +492,6 @@ export default function DashboardPage() {
                 </div>
               </div>
             </motion.div>
-
-            {/* Recent Matches */}
-            {/* <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-              className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="font-bold text-gray-900">Recent Matches</h3>
-                <span className="text-sm text-blue-600 font-medium">View All</span>
-              </div>
-              
-              <div className="space-y-4">
-                {[1, 2, 3].map((match) => (
-                  <div key={match} className="flex items-center p-3 hover:bg-gray-50 rounded-xl transition-colors cursor-pointer">
-                    <div className="w-12 h-12 bg-linear-to-r from-emerald-100 to-green-100 rounded-xl flex items-center justify-center mr-4">
-                      <Award className="text-emerald-600" size={20} />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-900">Phone & Keys Match</p>
-                      <p className="text-sm text-gray-500">2 hours ago • 92% accuracy</p>
-                    </div>
-                    <ChevronRight className="text-gray-400" size={20} />
-                  </div>
-                ))}
-              </div>
-            </motion.div> */}
-
-            {/* Quick Actions */}
-            {/* <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 }}
-              className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
-            >
-              <h3 className="font-bold text-gray-900 mb-6">Quick Actions</h3>
-              
-              <div className="space-y-3">
-                <button className="w-full text-left px-4 py-3 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition-colors flex items-center">
-                  <Zap size={18} className="mr-3" />
-                  Run AI Match Scan
-                </button>
-                <button className="w-full text-left px-4 py-3 bg-emerald-50 text-emerald-700 rounded-xl hover:bg-emerald-100 transition-colors flex items-center">
-                  <Bell size={18} className="mr-3" />
-                  Set Alert Preferences
-                </button>
-                <button className="w-full text-left px-4 py-3 bg-violet-50 text-violet-700 rounded-xl hover:bg-violet-100 transition-colors flex items-center">
-                  <Users size={18} className="mr-3" />
-                  Invite Friends
-                </button>
-              </div>
-            </motion.div> */}
           </div>
         </div>
       </div>

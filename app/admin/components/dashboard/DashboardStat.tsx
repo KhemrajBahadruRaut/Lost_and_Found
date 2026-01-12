@@ -76,8 +76,8 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({
         </ul>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-500">Pending Matches</p>
-            <p className="text-2xl font-bold">{stats.pendingMatches}</p>
+            <p className="text-sm text-gray-500">Total Matched Items</p>
+            <p className="text-2xl font-bold">{stats.totalMatches}</p>
           </div>
           <div className="text-right">
             <p className="text-sm text-gray-500">Similarity Threshold</p>
