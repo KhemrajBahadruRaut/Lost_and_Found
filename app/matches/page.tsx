@@ -190,7 +190,7 @@ export default function Matches() {
                       <div className="flex items-center gap-2"><Calendar size={16} />{new Date(match.lostPost.date).toLocaleDateString()}</div>
                     </div>
 
-                    <div className="pt-3 border-t">
+                    <div className="pt-3 border-t hidden">
                       <p className="text-sm font-medium text-gray-700 mb-1">Contact Information:</p>
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Mail size={14} /><a href={`mailto:${match.lostPost.user.email}`} className="hover:text-blue-600">{match.lostPost.user.email}</a>
@@ -217,7 +217,7 @@ export default function Matches() {
                       <div className="flex items-center gap-2"><Calendar size={16} />{new Date(match.foundPost.date).toLocaleDateString()}</div>
                     </div>
 
-                    <div className="pt-3 border-t">
+                    <div className="pt-3 border-t hidden">
                       <p className="text-sm font-medium text-gray-700 mb-1">Contact Information:</p>
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Mail size={14} /><a href={`mailto:${match.foundPost.user.email}`} className="hover:text-blue-600">{match.foundPost.user.email}</a>

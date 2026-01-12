@@ -151,6 +151,7 @@ const MatchesTable: React.FC<MatchesTableProps> = ({
                             <span className="font-semibold block text-sm">User Info:</span>
                             <div className="text-sm">{selectedMatch.lostPost.user.name}</div>
                             <div className="text-sm">{selectedMatch.lostPost.user.email}</div>
+                            <div className="text-sm">{selectedMatch.lostPost.user.phone}</div>
                         </div>
                     </div>
 
@@ -176,6 +177,7 @@ const MatchesTable: React.FC<MatchesTableProps> = ({
                             <span className="font-semibold block text-sm">User Info:</span>
                             <div className="text-sm">{selectedMatch.foundPost.user.name}</div>
                             <div className="text-sm">{selectedMatch.foundPost.user.email}</div>
+                            <div className="text-sm">{selectedMatch.foundPost.user.phone}</div>
                         </div>
                     </div>
                 </div>
