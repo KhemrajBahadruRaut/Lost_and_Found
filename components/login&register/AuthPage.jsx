@@ -1,6 +1,18 @@
 "use client"
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { 
+  Mail, 
+  Lock, 
+  User, 
+  Phone, 
+  ArrowRight, 
+  Loader2, 
+  CheckCircle2, 
+  AlertCircle, 
+  KeyRound,
+  ShieldCheck
+} from 'lucide-react';
 
 export default function AuthPage() {
   const router = useRouter();
@@ -21,6 +33,7 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [pendingEmail, setPendingEmail] = useState('');
 
+  // --- LOGIC STARTS (UNCHANGED) ---
   const validateName = (name) => {
     if (!name.trim()) return 'Full name is required';
     if (/\d/.test(name)) return 'Name cannot contain numbers';
@@ -143,10 +156,8 @@ export default function AuthPage() {
     try {
       const response = await fetch('http://localhost/lost_and_found_backend/auth/signup.php', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // Added for cookie support
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(formData)
       });
 
@@ -183,14 +194,9 @@ export default function AuthPage() {
     try {
       const response = await fetch('http://localhost/lost_and_found_backend/auth/verify_email.php', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // Added for cookie support
-        body: JSON.stringify({
-          email: pendingEmail,
-          code: formData.verificationCode
-        })
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email: pendingEmail, code: formData.verificationCode })
       });
 
       const data = await response.json();
@@ -198,9 +204,7 @@ export default function AuthPage() {
       if (data.success) {
         setSuccess(data.message);
         setErrors({});
-        setTimeout(() => {
-          switchView('login');
-        }, 2000);
+        setTimeout(() => { switchView('login'); }, 2000);
       } else {
         setErrors({ submit: data.message });
       }
@@ -211,71 +215,81 @@ export default function AuthPage() {
     }
   };
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    
-    setTouched({ email: true, password: true });
+const handleLogin = async (e) => {
+  e.preventDefault();
+  setTouched({ email: true, password: true });
 
-    const newErrors = {};
-    const emailError = validateEmail(formData.email);
-    const passwordError = validatePassword(formData.password);
-    
-    if (emailError) newErrors.email = emailError;
-    if (passwordError) newErrors.password = passwordError;
+  const newErrors = {};
+  const emailError = validateEmail(formData.email);
+  const passwordError = validatePassword(formData.password);
+  
+  if (emailError) newErrors.email = emailError;
+  if (passwordError) newErrors.password = passwordError;
 
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await fetch('http://localhost/lost_and_found_backend/auth/login.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // CRITICAL: This allows cookies to be set
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-
-  if (data.token) {
-    localStorage.setItem('admin_token', data.token);
-    // Also save user info if available
-    if (data.user) {
-      localStorage.setItem('admin_user', JSON.stringify(data.user));
-    }
+  if (Object.keys(newErrors).length > 0) {
+    setErrors(newErrors);
+    return;
   }
 
-  const redirect =
-    data.type === 'admin'
-      ? '/admin'
-      : '/dashboard';
+  setLoading(true);
+  try {
+    const response = await fetch('http://localhost/lost_and_found_backend/auth/login.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email: formData.email, password: formData.password })
+    });
 
-  setTimeout(() => {
-    router.push(redirect);
-    router.refresh();
-  }, 800);
+    const data = await response.json();
 
-
-      } else {
-        setErrors({ submit: data.message });
+    if (data.success) {
+      if (data.user) {
+        // Backend returns { id, name, email } - store it properly
+        const userData = {
+          id: data.user.id,
+          name: data.user.name, // This comes from backend as 'name'
+          email: data.user.email,
+          role: 'User' // Default role for regular users
+        };
+        
+        // Store with the key that Navbar expects
+        localStorage.setItem('user', JSON.stringify(userData));
+        
+        // Trigger event so Navbar updates immediately
+        window.dispatchEvent(new Event('userUpdated'));
       }
-    } catch (error) {
-      console.error('Login error:', error);
-      setErrors({ submit: 'Network error. Please try again.' });
-    } finally {
-      setLoading(false);
-    }
-  };
+      
+      // Handle admin login separately
+      if (data.type === 'admin' && data.token) {
+        localStorage.setItem('admin_token', data.token);
+        // For admin, create a minimal user object
+        const adminUser = {
+          id: 'admin',
+          name: 'Admin',
+          email: formData.email,
+          role: 'Admin'
+        };
+        localStorage.setItem('user', JSON.stringify(adminUser));
+        localStorage.setItem('admin_user', JSON.stringify(adminUser));
+        window.dispatchEvent(new Event('userUpdated'));
+      }
 
+      // Redirect based on user type
+      const redirect = data.type === 'admin' ? '/admin' : '/dashboard';
+      setTimeout(() => {
+        router.push(redirect);
+        router.refresh();
+      }, 800);
+    } else {
+      setErrors({ submit: data.message });
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    setErrors({ submit: 'Network error. Please try again.' });
+  } finally {
+    setLoading(false);
+  }
+};
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     setTouched({ email: true });
@@ -290,10 +304,8 @@ export default function AuthPage() {
     try {
       const response = await fetch('http://localhost/lost_and_found_backend/auth/forget_password.php', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // Added for cookie support
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ email: formData.email })
       });
 
@@ -318,7 +330,6 @@ export default function AuthPage() {
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
-    
     setTouched({ verificationCode: true, password: true, confirmPassword: true });
 
     const newErrors = {};
@@ -339,15 +350,9 @@ export default function AuthPage() {
     try {
       const response = await fetch('http://localhost/lost_and_found_backend/auth/reset_password.php', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // Added for cookie support
-        body: JSON.stringify({
-          email: pendingEmail,
-          code: formData.verificationCode,
-          password: formData.password
-        })
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email: pendingEmail, code: formData.verificationCode, password: formData.password })
       });
 
       const data = await response.json();
@@ -355,9 +360,7 @@ export default function AuthPage() {
       if (data.success) {
         setSuccess(data.message);
         setErrors({});
-        setTimeout(() => {
-          switchView('login');
-        }, 2000);
+        setTimeout(() => { switchView('login'); }, 2000);
       } else {
         setErrors({ submit: data.message });
       }
@@ -384,384 +387,351 @@ export default function AuthPage() {
     setSuccess('');
     setPendingEmail('');
   };
+  // --- LOGIC ENDS ---
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">
-          {view === 'login' && 'Welcome Back'}
-          {view === 'signup' && 'Create Account'}
-          {view === 'forgot' && 'Reset Password'}
-          {view === 'verify' && 'Verify Email'}
-          {view === 'reset' && 'Reset Password'}
-        </h2>
-        <p className="text-center text-gray-600 mb-8">
-          {view === 'login' && 'Login to your account'}
-          {view === 'signup' && 'Sign up to get started'}
-          {view === 'forgot' && 'Enter your email to receive reset code'}
-          {view === 'verify' && 'Enter the 6-digit code sent to your email'}
-          {view === 'reset' && 'Enter verification code and new password'}
-        </p>
-
-        {success && (
-          <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-            {success}
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,var(--tw-gradient-stops))] from-indigo-100 via-slate-50 to-indigo-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        
+        {/* Brand/Header Section */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-600 text-white mb-4 shadow-lg shadow-indigo-600/30">
+            <ShieldCheck size={28} />
           </div>
-        )}
-
-        {errors.submit && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-            {errors.submit}
-          </div>
-        )}
-
-        <div className="space-y-4">
-          {view === 'signup' && (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition ${
-                    errors.fullName ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="Your Name "
-                />
-                {errors.fullName && touched.fullName && (
-                  <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition ${
-                    errors.email ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="abc@gmail.com"
-                />
-                {errors.email && touched.email && (
-                  <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition ${
-                    errors.phoneNumber ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="98XXXXXXXX"
-                  maxLength="10"
-                />
-                {errors.phoneNumber && touched.phoneNumber && (
-                  <p className="text-red-500 text-xs mt-1">{errors.phoneNumber}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition ${
-                    errors.password ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="••••••••"
-                />
-                {errors.password && touched.password && (
-                  <p className="text-red-500 text-xs mt-1">{errors.password}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Confirm Password
-                </label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition ${
-                    errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="••••••••"
-                />
-                {errors.confirmPassword && touched.confirmPassword && (
-                  <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
-                )}
-              </div>
-
-              <button
-                onClick={handleSignup}
-                disabled={loading}
-                className="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition duration-200 mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Processing...' : 'Sign Up'}
-              </button>
-            </>
-          )}
-
-          {view === 'login' && (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition ${
-                    errors.email ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="john@example.com"
-                />
-                {errors.email && touched.email && (
-                  <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition ${
-                    errors.password ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="••••••••"
-                />
-                {errors.password && touched.password && (
-                  <p className="text-red-500 text-xs mt-1">{errors.password}</p>
-                )}
-              </div>
-
-              <div className="text-right">
-                <button
-                  onClick={() => switchView('forgot')}
-                  className="text-sm text-indigo-600 hover:text-indigo-700 transition"
-                >
-                  Forgot Password?
-                </button>
-              </div>
-
-              <button
-                onClick={handleLogin}
-                disabled={loading}
-                className="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition duration-200 mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Processing...' : 'Login'}
-              </button>
-            </>
-          )}
-
-          {view === 'forgot' && (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition ${
-                    errors.email ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="john@example.com"
-                />
-                {errors.email && touched.email && (
-                  <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-                )}
-              </div>
-
-              <button
-                onClick={handleForgotPassword}
-                disabled={loading}
-                className="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition duration-200 mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Processing...' : 'Send Reset Code'}
-              </button>
-            </>
-          )}
-
-          {view === 'verify' && (
-            <>
-              <div className="text-center mb-4">
-                <p className="text-sm text-gray-600">
-                  Verification code sent to <span className="font-semibold">{pendingEmail}</span>
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Verification Code
-                </label>
-                <input
-                  type="text"
-                  name="verificationCode"
-                  value={formData.verificationCode}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition text-center text-2xl tracking-widest ${
-                    errors.verificationCode ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="000000"
-                  maxLength="6"
-                />
-                {errors.verificationCode && touched.verificationCode && (
-                  <p className="text-red-500 text-xs mt-1">{errors.verificationCode}</p>
-                )}
-              </div>
-
-              <button
-                onClick={handleVerifyEmail}
-                disabled={loading}
-                className="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition duration-200 mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Verifying...' : 'Verify Email'}
-              </button>
-            </>
-          )}
-
-          {view === 'reset' && (
-            <>
-              <div className="text-center mb-4">
-                <p className="text-sm text-gray-600">
-                  Reset code sent to <span className="font-semibold">{pendingEmail}</span>
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Verification Code
-                </label>
-                <input
-                  type="text"
-                  name="verificationCode"
-                  value={formData.verificationCode}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition text-center text-2xl tracking-widest ${
-                    errors.verificationCode ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="000000"
-                  maxLength="6"
-                />
-                {errors.verificationCode && touched.verificationCode && (
-                  <p className="text-red-500 text-xs mt-1">{errors.verificationCode}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  New Password
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition ${
-                    errors.password ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="••••••••"
-                />
-                {errors.password && touched.password && (
-                  <p className="text-red-500 text-xs mt-1">{errors.password}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Confirm New Password
-                </label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition ${
-                    errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="••••••••"
-                />
-                {errors.confirmPassword && touched.confirmPassword && (
-                  <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
-                )}
-              </div>
-
-              <button
-                onClick={handleResetPassword}
-                disabled={loading}
-                className="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition duration-200 mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Resetting...' : 'Reset Password'}
-              </button>
-            </>
-          )}
+          <h2 className="text-3xl font-bold text-gray-900 tracking-tight">
+            {view === 'login' && 'Welcome Back'}
+            {view === 'signup' && 'Create Account'}
+            {view === 'forgot' && 'Reset Password'}
+            {view === 'verify' && 'Verify Email'}
+            {view === 'reset' && 'New Password'}
+          </h2>
+          <p className="mt-2 text-sm text-gray-600">
+            {view === 'login' && 'Please enter your details to sign in.'}
+            {view === 'signup' && 'Join our community today.'}
+            {view === 'forgot' && 'Enter your email to receive a reset code.'}
+            {view === 'verify' && <span>We sent a 6-digit code to <span className="font-medium text-indigo-600">{pendingEmail}</span></span>}
+            {view === 'reset' && 'Secure your account with a new password.'}
+          </p>
         </div>
 
-        <div className="mt-6 text-center">
-          {(view === 'forgot' || view === 'verify' || view === 'reset') ? (
-            <button
-              onClick={() => switchView('login')}
-              className="text-indigo-600 font-semibold hover:text-indigo-700 transition"
-            >
-              Back to Login
-            </button>
-          ) : (
-            <p className="text-gray-600">
-              {view === 'login' ? "Don't have an account? " : 'Already have an account? '}
-              <button
-                onClick={() => switchView(view === 'login' ? 'signup' : 'login')}
-                className="text-indigo-600 font-semibold hover:text-indigo-700 transition"
-              >
-                {view === 'login' ? 'Sign Up' : 'Login'}
-              </button>
-            </p>
+        {/* Card */}
+        <div className="bg-white/80 backdrop-blur-xl border border-white/50 shadow-2xl rounded-2xl p-8 animate-in fade-in zoom-in duration-300">
+          
+          {/* Alerts */}
+          {success && (
+            <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl flex items-start gap-3">
+              <CheckCircle2 size={20} className="shrink-0 mt-0.5" />
+              <span className="text-sm font-medium">{success}</span>
+            </div>
           )}
+
+          {errors.submit && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-start gap-3">
+              <AlertCircle size={20} className="shrink-0 mt-0.5" />
+              <span className="text-sm font-medium">{errors.submit}</span>
+            </div>
+          )}
+
+          <div className="space-y-5">
+            {view === 'signup' && (
+              <>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Full Name</label>
+                  <div className="relative group">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+                    <input
+                      type="text"
+                      name="fullName"
+                      value={formData.fullName}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      className={`w-full pl-10 pr-4 py-3 bg-gray-50 border ${errors.fullName && touched.fullName ? 'border-red-300 focus:ring-red-200' : 'border-gray-200 focus:ring-indigo-100 focus:border-indigo-500'} rounded-xl focus:ring-4 outline-none transition-all duration-200`}
+                      placeholder="Your Full Name"
+                    />
+                  </div>
+                  {errors.fullName && touched.fullName && <p className="text-red-500 text-xs ml-1 flex items-center gap-1"><AlertCircle size={12}/>{errors.fullName}</p>}
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Email</label>
+                  <div className="relative group">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      className={`w-full pl-10 pr-4 py-3 bg-gray-50 border ${errors.email && touched.email ? 'border-red-300 focus:ring-red-200' : 'border-gray-200 focus:ring-indigo-100 focus:border-indigo-500'} rounded-xl focus:ring-4 outline-none transition-all duration-200`}
+                      placeholder="abc@example.com"
+                    />
+                  </div>
+                  {errors.email && touched.email && <p className="text-red-500 text-xs ml-1 flex items-center gap-1"><AlertCircle size={12}/>{errors.email}</p>}
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Phone Number</label>
+                  <div className="relative group">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+                    <input
+                      type="tel"
+                      name="phoneNumber"
+                      value={formData.phoneNumber}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      maxLength="10"
+                      className={`w-full pl-10 pr-4 py-3 bg-gray-50 border ${errors.phoneNumber && touched.phoneNumber ? 'border-red-300 focus:ring-red-200' : 'border-gray-200 focus:ring-indigo-100 focus:border-indigo-500'} rounded-xl focus:ring-4 outline-none transition-all duration-200`}
+                      placeholder="98XXXXXXXX"
+                    />
+                  </div>
+                  {errors.phoneNumber && touched.phoneNumber && <p className="text-red-500 text-xs ml-1 flex items-center gap-1"><AlertCircle size={12}/>{errors.phoneNumber}</p>}
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Password</label>
+                  <div className="relative group">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+                    <input
+                      type="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      className={`w-full pl-10 pr-4 py-3 bg-gray-50 border ${errors.password && touched.password ? 'border-red-300 focus:ring-red-200' : 'border-gray-200 focus:ring-indigo-100 focus:border-indigo-500'} rounded-xl focus:ring-4 outline-none transition-all duration-200`}
+                      placeholder="••••••••"
+                    />
+                  </div>
+                  {errors.password && touched.password && <p className="text-red-500 text-xs ml-1 flex items-center gap-1"><AlertCircle size={12}/>{errors.password}</p>}
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Confirm Password</label>
+                  <div className="relative group">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      className={`w-full pl-10 pr-4 py-3 bg-gray-50 border ${errors.confirmPassword && touched.confirmPassword ? 'border-red-300 focus:ring-red-200' : 'border-gray-200 focus:ring-indigo-100 focus:border-indigo-500'} rounded-xl focus:ring-4 outline-none transition-all duration-200`}
+                      placeholder="••••••••"
+                    />
+                  </div>
+                  {errors.confirmPassword && touched.confirmPassword && <p className="text-red-500 text-xs ml-1 flex items-center gap-1"><AlertCircle size={12}/>{errors.confirmPassword}</p>}
+                </div>
+
+                <button
+                  onClick={handleSignup}
+                  disabled={loading}
+                  className="w-full bg-indigo-600 text-white py-3.5 rounded-xl font-bold hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-600/20 active:scale-[0.98] transition-all duration-200 mt-6 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {loading ? <Loader2 className="animate-spin" /> : <>Create Account <ArrowRight size={18}/></>}
+                </button>
+              </>
+            )}
+
+            {view === 'login' && (
+              <>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Email</label>
+                  <div className="relative group">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      className={`w-full pl-10 pr-4 py-3 bg-gray-50 border ${errors.email && touched.email ? 'border-red-300 focus:ring-red-200' : 'border-gray-200 focus:ring-indigo-100 focus:border-indigo-500'} rounded-xl focus:ring-4 outline-none transition-all duration-200`}
+                      placeholder="john@example.com"
+                    />
+                  </div>
+                  {errors.email && touched.email && <p className="text-red-500 text-xs ml-1 flex items-center gap-1"><AlertCircle size={12}/>{errors.email}</p>}
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Password</label>
+                  <div className="relative group">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+                    <input
+                      type="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      className={`w-full pl-10 pr-4 py-3 bg-gray-50 border ${errors.password && touched.password ? 'border-red-300 focus:ring-red-200' : 'border-gray-200 focus:ring-indigo-100 focus:border-indigo-500'} rounded-xl focus:ring-4 outline-none transition-all duration-200`}
+                      placeholder="••••••••"
+                    />
+                  </div>
+                  {errors.password && touched.password && <p className="text-red-500 text-xs ml-1 flex items-center gap-1"><AlertCircle size={12}/>{errors.password}</p>}
+                </div>
+
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => switchView('forgot')}
+                    className="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors hover:underline underline-offset-4"
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
+
+                <button
+                  onClick={handleLogin}
+                  disabled={loading}
+                  className="w-full bg-indigo-600 text-white py-3.5 rounded-xl font-bold hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-600/20 active:scale-[0.98] transition-all duration-200 mt-2 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {loading ? <Loader2 className="animate-spin" /> : <>Sign In <ArrowRight size={18}/></>}
+                </button>
+              </>
+            )}
+
+            {view === 'forgot' && (
+              <>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Email Address</label>
+                  <div className="relative group">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      className={`w-full pl-10 pr-4 py-3 bg-gray-50 border ${errors.email && touched.email ? 'border-red-300 focus:ring-red-200' : 'border-gray-200 focus:ring-indigo-100 focus:border-indigo-500'} rounded-xl focus:ring-4 outline-none transition-all duration-200`}
+                      placeholder="john@example.com"
+                    />
+                  </div>
+                  {errors.email && touched.email && <p className="text-red-500 text-xs ml-1 flex items-center gap-1"><AlertCircle size={12}/>{errors.email}</p>}
+                </div>
+
+                <button
+                  onClick={handleForgotPassword}
+                  disabled={loading}
+                  className="w-full bg-indigo-600 text-white py-3.5 rounded-xl font-bold hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-600/20 active:scale-[0.98] transition-all duration-200 mt-6 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {loading ? <Loader2 className="animate-spin" /> : 'Send Reset Code'}
+                </button>
+              </>
+            )}
+
+            {view === 'verify' && (
+              <>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">6-Digit Code</label>
+                  <div className="relative">
+                    <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input
+                      type="text"
+                      name="verificationCode"
+                      value={formData.verificationCode}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      className={`w-full pl-10 pr-4 py-3 bg-gray-50 border ${errors.verificationCode && touched.verificationCode ? 'border-red-300 focus:ring-red-200' : 'border-gray-200 focus:ring-indigo-100 focus:border-indigo-500'} rounded-xl focus:ring-4 outline-none transition-all duration-200 text-center text-xl tracking-[0.5em] font-mono`}
+                      placeholder="000000"
+                      maxLength="6"
+                    />
+                  </div>
+                  {errors.verificationCode && touched.verificationCode && <p className="text-red-500 text-xs ml-1 flex items-center gap-1"><AlertCircle size={12}/>{errors.verificationCode}</p>}
+                </div>
+
+                <button
+                  onClick={handleVerifyEmail}
+                  disabled={loading}
+                  className="w-full bg-indigo-600 text-white py-3.5 rounded-xl font-bold hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-600/20 active:scale-[0.98] transition-all duration-200 mt-6 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {loading ? <Loader2 className="animate-spin" /> : 'Verify Email'}
+                </button>
+              </>
+            )}
+
+            {view === 'reset' && (
+              <>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Verification Code</label>
+                  <div className="relative">
+                     <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input
+                      type="text"
+                      name="verificationCode"
+                      value={formData.verificationCode}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      className={`w-full pl-10 pr-4 py-3 bg-gray-50 border ${errors.verificationCode && touched.verificationCode ? 'border-red-300 focus:ring-red-200' : 'border-gray-200 focus:ring-indigo-100 focus:border-indigo-500'} rounded-xl focus:ring-4 outline-none transition-all duration-200 text-center text-xl tracking-[0.5em] font-mono`}
+                      placeholder="000000"
+                      maxLength="6"
+                    />
+                  </div>
+                  {errors.verificationCode && touched.verificationCode && <p className="text-red-500 text-xs ml-1 flex items-center gap-1"><AlertCircle size={12}/>{errors.verificationCode}</p>}
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">New Password</label>
+                  <div className="relative group">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+                    <input
+                      type="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      className={`w-full pl-10 pr-4 py-3 bg-gray-50 border ${errors.password && touched.password ? 'border-red-300 focus:ring-red-200' : 'border-gray-200 focus:ring-indigo-100 focus:border-indigo-500'} rounded-xl focus:ring-4 outline-none transition-all duration-200`}
+                      placeholder="••••••••"
+                    />
+                  </div>
+                  {errors.password && touched.password && <p className="text-red-500 text-xs ml-1 flex items-center gap-1"><AlertCircle size={12}/>{errors.password}</p>}
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Confirm New Password</label>
+                  <div className="relative group">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      className={`w-full pl-10 pr-4 py-3 bg-gray-50 border ${errors.confirmPassword && touched.confirmPassword ? 'border-red-300 focus:ring-red-200' : 'border-gray-200 focus:ring-indigo-100 focus:border-indigo-500'} rounded-xl focus:ring-4 outline-none transition-all duration-200`}
+                      placeholder="••••••••"
+                    />
+                  </div>
+                  {errors.confirmPassword && touched.confirmPassword && <p className="text-red-500 text-xs ml-1 flex items-center gap-1"><AlertCircle size={12}/>{errors.confirmPassword}</p>}
+                </div>
+
+                <button
+                  onClick={handleResetPassword}
+                  disabled={loading}
+                  className="w-full bg-indigo-600 text-white py-3.5 rounded-xl font-bold hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-600/20 active:scale-[0.98] transition-all duration-200 mt-6 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {loading ? <Loader2 className="animate-spin" /> : 'Reset Password'}
+                </button>
+              </>
+            )}
+          </div>
+
+          <div className="mt-8 text-center pt-6 border-t border-gray-100">
+            {(view === 'forgot' || view === 'verify' || view === 'reset') ? (
+              <button
+                onClick={() => switchView('login')}
+                className="text-gray-600 hover:text-indigo-600 font-medium transition-colors flex items-center justify-center gap-2 mx-auto"
+              >
+                <ArrowRight className="rotate-180" size={16}/> Back to Login
+              </button>
+            ) : (
+              <p className="text-gray-600 text-sm">
+                {view === 'login' ? "Don't have an account? " : 'Already have an account? '}
+                <button
+                  onClick={() => switchView(view === 'login' ? 'signup' : 'login')}
+                  className="text-indigo-600 font-bold hover:text-indigo-700 transition-colors hover:underline"
+                >
+                  {view === 'login' ? 'Sign Up' : 'Login'}
+                </button>
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>
   );
-} 
+}
