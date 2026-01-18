@@ -113,9 +113,9 @@ const LostItemsTable: React.FC<LostItemsTableProps> = ({
                               src={item.image} 
                               alt={item.title} 
                               className="w-full h-full object-cover"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/100';
-                              }}
+                              // onError={(e) => {
+                              //   (e.target as HTMLImageElement).src = 'https://via.placeholder.com/100';
+                              // }}
                             />
                           </div>
                           <div className="min-w-0">
@@ -204,7 +204,7 @@ const LostItemsTable: React.FC<LostItemsTableProps> = ({
       {selectedItem && (
         <div className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-gray-200">
-            <div className="flex justify-between items-center p-6 border-b bg-gradient-to-r from-red-50 to-white">
+            <div className="flex justify-between items-center p-6 border-b bg-linear-to-r from-red-50 to-white">
               <h3 className="text-xl font-bold text-gray-900">Lost Item Details</h3>
               <button onClick={() => setSelectedItem(null)} className="text-gray-500 hover:text-gray-700 text-2xl font-bold">×</button>
             </div>
