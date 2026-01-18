@@ -1,29 +1,17 @@
 'use client';
+
 import { useEffect, useState } from 'react';
 import { 
-  Search, 
-  Filter, 
-  MapPin, 
-  Eye, 
-  MessageSquare, 
-  TrendingUp,
-  Users,
-  Target,
-  Clock,
-  Award,
-  Bell,
-  Download,
-  Shield,
-  Zap,
-  BarChart,
-  PieChart,
-  ArrowUpRight,
-  ChevronRight,
-  RefreshCw
+  Search, Filter, MapPin, Eye, MessageSquare, 
+  TrendingUp, Users, Clock, Zap, RefreshCw, 
+  LayoutGrid, List, AlertCircle, CheckCircle2,
+  ArrowRight, Box, Bell, Menu, X, User,
+  BarChart3
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 
+// --- Interfaces (Matches your backend structure) ---
 interface Post {
   id: string;
   type: 'lost' | 'found';
@@ -49,12 +37,17 @@ interface DashboardStats {
   activeUsers: number;
 }
 
-
 export default function DashboardPage() {
+  // --- State ---
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<'all' | 'lost' | 'found'>('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeNav, setActiveNav] = useState('dashboard');
+
   const [stats, setStats] = useState<DashboardStats>({
     totalPosts: 0,
     lostItems: 0,
@@ -63,8 +56,8 @@ export default function DashboardPage() {
     recoveryRate: 0,
     activeUsers: 0
   });
-  const [activeTab, setActiveTab] = useState('all');
 
+  // --- Effects ---
   useEffect(() => {
     fetchDashboardData();
     const interval = setInterval(() => {
@@ -73,72 +66,62 @@ export default function DashboardPage() {
     return () => clearInterval(interval);
   }, []);
 
+  // --- Data Fetching Logic (Your Original Code) ---
   const fetchDashboardData = async () => {
-  try {
-    const response = await fetch(
-      'http://localhost/lost_and_found_backend/posts/get_posts.php',
-      {
-        method: 'GET',
-        credentials: 'include'
-      }
-    );
+    try {
+      const response = await fetch(
+        'http://localhost/lost_and_found_backend/posts/get_posts.php',
+        { method: 'GET', credentials: 'include' }
+      );
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch posts');
+      if (!response.ok) throw new Error('Failed to fetch posts');
+
+      const postsData: Post[] = await response.json();
+      setPosts(postsData);
+      setStats(calculateStatsFromPosts(postsData));
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
     }
-
-    const postsData: Post[] = await response.json();
-    setPosts(postsData);
-
-    const calculatedStats = calculateStatsFromPosts(postsData);
-    setStats(calculatedStats);
-
-  } catch (error) {
-    console.error('Error fetching dashboard data:', error);
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   const fetchPosts = async () => {
-  try {
-    const response = await fetch(
-      'http://localhost/lost_and_found_backend/posts/get_posts.php',
-      {
-        method: 'GET',
-        credentials: 'include'
-      }
-    );
+    setIsRefreshing(true);
+    try {
+      const response = await fetch(
+        'http://localhost/lost_and_found_backend/posts/get_posts.php',
+        { method: 'GET', credentials: 'include' }
+      );
 
-    if (response.ok) {
-      const data: Post[] = await response.json();
-      setPosts(data);
-      setStats(calculateStatsFromPosts(data));
+      if (response.ok) {
+        const data: Post[] = await response.json();
+        setPosts(data);
+        setStats(calculateStatsFromPosts(data));
+      }
+    } catch (error) {
+      console.error('Error refreshing posts:', error);
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 800);
     }
-  } catch (error) {
-    console.error('Error refreshing posts:', error);
-  }
-};
+  };
 
   const calculateStatsFromPosts = (posts: Post[]) => {
-  const totalPosts = posts.length;
-  const lostItems = posts.filter(p => p.type === 'lost').length;
-  const foundItems = posts.filter(p => p.type === 'found').length;
+    const totalPosts = posts.length;
+    const lostItems = posts.filter(p => p.type === 'lost').length;
+    const foundItems = posts.filter(p => p.type === 'found').length;
 
-  return {
-    totalPosts,
-    lostItems,
-    foundItems,
-    matchesMade: 0,        // update later from matches API
-    recoveryRate: totalPosts
-      ? Math.round((foundItems / totalPosts) * 100)
-      : 0,
-    activeUsers: new Set(posts.map(p => p.user.email)).size
+    return {
+      totalPosts,
+      lostItems,
+      foundItems,
+      matchesMade: 0, // Update later from matches API
+      recoveryRate: totalPosts ? Math.round((foundItems / totalPosts) * 100) : 0,
+      activeUsers: new Set(posts.map(p => p.user.email)).size
+    };
   };
-};
 
-
+  // --- Filtering ---
   const filteredPosts = posts.filter(post => {
     const matchesSearch =
       searchTerm === '' ||
@@ -151,350 +134,248 @@ export default function DashboardPage() {
     return matchesSearch && matchesFilter;
   });
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'resolved': return 'bg-green-100 text-green-800 border-green-200';
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      default: return 'bg-blue-100 text-blue-800 border-blue-200';
-    }
-  };
-
-  const getTypeColor = (type: string) => {
-    return type === 'lost' 
-      ? 'bg-gradient-to-r from-red-500 to-pink-500' 
-      : 'bg-gradient-to-r from-emerald-500 to-green-500';
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-blue-50/30 flex items-center justify-center">
-        <div className="text-center">
-          <div className="relative">
-            <div className="w-20 h-20 border-4 border-blue-200 rounded-full"></div>
-            <div className="absolute top-0 left-0 w-20 h-20 border-4 border-blue-600 rounded-full animate-spin border-t-transparent"></div>
-          </div>
-          <p className="mt-4 text-gray-600 font-medium">Loading Dashboard...</p>
-        </div>
-      </div>
-    );
-  }
+  // --- Helper Components ---
+  const NavItem = ({ id, label, icon: Icon }: any) => (
+    <button
+      onClick={() => setActiveNav(id)}
+      className={`relative px-4 py-2 text-sm font-medium transition-colors ${
+        activeNav === id ? 'text-blue-600' : 'text-slate-500 hover:text-slate-700'
+      }`}
+    >
+      {activeNav === id && (
+        <motion.div
+          layoutId="nav-pill"
+          className="absolute inset-0 bg-blue-50 rounded-full"
+          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+        />
+      )}
+      <span className="relative z-10 flex items-center gap-2">
+        <Icon size={16} /> {label}
+      </span>
+    </button>
+  );
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-blue-50/30 pb-20">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                 Dashboard
-              </h1>
-              <div className="flex items-center mt-2 space-x-4">
-                <div className="flex items-center text-sm text-gray-600">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></div>
-                  <span>System Live • Last updated just now</span>
+    <div className="min-h-screen bg-slate-50/50 font-sans text-slate-900 selection:bg-blue-100 pb-20">
+      
+      {/* --- Premium Glass Navbar --- */}
+      
+
+      {/* --- Main Content --- */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        
+        {/* Header Area */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">Overview</h1>
+            <p className="text-slate-500 mt-1">Real-time insights on lost and found items across campus.</p>
+          </div>
+          <button 
+            onClick={fetchPosts}
+            className={`flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm ${isRefreshing ? 'animate-pulse' : ''}`}
+          >
+            <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
+            {isRefreshing ? 'Updating...' : 'Refresh Data'}
+          </button>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {[
+            { label: 'Total Items', val: stats.totalPosts, icon: Box, color: 'text-blue-600', bg: 'bg-blue-50' },
+            { label: 'Lost Active', val: stats.lostItems, icon: AlertCircle, color: 'text-rose-600', bg: 'bg-rose-50' },
+            { label: 'Found Items', val: stats.foundItems, icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+            { label: 'Active Users', val: stats.activeUsers, icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' }
+          ].map((item, i) => (
+            <motion.div 
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+              className="bg-white p-5 rounded-xl border border-slate-200/60 shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className={`p-2 rounded-lg ${item.bg} ${item.color}`}>
+                  <item.icon size={20} />
                 </div>
-                <button 
-                  onClick={fetchPosts}
-                  className="flex items-center text-sm text-blue-600 hover:text-blue-800"
-                >
-                  <RefreshCw size={14} className="mr-1" />
-                  Refresh
-                </button>
+                {i === 0 && <span className="text-xs font-bold text-slate-500">{stats.recoveryRate}% Recovery</span>}
               </div>
+              <p className="text-slate-500 text-sm font-medium">{item.label}</p>
+              <h3 className="text-2xl font-bold text-slate-900 mt-1">
+                {loading ? <div className="h-8 w-16 bg-slate-100 animate-pulse rounded" /> : item.val}
+              </h3>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Controls Toolbar */}
+        <div className="sticky top-20 z-30 bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-xl p-2 shadow-sm mb-6 flex flex-col md:flex-row gap-3">
+          
+          {/* Search Input */}
+          <div className="relative flex-1">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input 
+              type="text" 
+              placeholder="Search items by title, description, or location..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-transparent focus:bg-white border focus:border-blue-500 rounded-lg text-sm transition-all outline-none placeholder:text-slate-400"
+            />
+          </div>
+
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-hide">
+            {/* Filter Pills */}
+            <div className="flex bg-slate-100 p-1 rounded-lg shrink-0">
+              {['all', 'lost', 'found'].map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setFilter(type as any)}
+                  className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-md transition-all ${
+                    filter === type 
+                    ? 'bg-white text-slate-900 shadow-sm' 
+                    : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  {type}
+                </button>
+              ))}
             </div>
-            
-            <div className="mt-4 lg:mt-0 flex items-center space-x-4">
-              {/* <button className="flex items-center px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors">
-                <Download size={18} className="mr-2" />
-                Export Report
-              </button> */}
-              <Link href="/" >
-              <button className="flex items-center px-4 py-2 bg-linear-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:shadow-lg transition-all">
-                <Zap size={18} className="mr-2" />
-                Quick Match
-              </button>
-              </Link>
-            </div>
+
+            <div className="w-px h-8 bg-slate-200 mx-1 hidden md:block" />
+
+            {/* View Toggles */}
+            <button 
+              onClick={() => setViewMode('grid')} 
+              className={`p-2.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-slate-100 text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}
+            >
+              <LayoutGrid size={18} />
+            </button>
+            <button 
+              onClick={() => setViewMode('list')} 
+              className={`p-2.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-slate-100 text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}
+            >
+              <List size={18} />
+            </button>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-2 py-3">
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-3">
+        {/* Content Area */}
+        {loading ? (
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+             {[1,2,3,4,5,6].map(n => (
+               <div key={n} className="bg-white rounded-2xl p-4 border border-slate-200 space-y-4">
+                 <div className="h-48 bg-slate-100 rounded-xl animate-pulse" />
+                 <div className="h-4 bg-slate-100 rounded w-3/4 animate-pulse" />
+                 <div className="h-4 bg-slate-100 rounded w-1/2 animate-pulse" />
+               </div>
+             ))}
+           </div>
+        ) : filteredPosts.length === 0 ? (
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            className="text-center py-20 bg-white border border-dashed border-slate-300 rounded-xl"
           >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Items</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{stats.totalPosts}</p>
-              </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                <BarChart className="text-blue-600" size={24} />
-              </div>
-            </div>
-            <div className="flex items-center mt-4 text-sm">
-              <TrendingUp size={16} className="text-green-500 mr-1" />
-              <span className="text-green-600 font-medium">+12% from last week</span>
-            </div>
+             <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
+               <Search size={32} />
+             </div>
+             <h3 className="text-slate-900 font-bold text-lg">No items found</h3>
+             <p className="text-slate-500 text-sm mt-1">Try adjusting your filters to see more results.</p>
+             <button 
+              onClick={() => {setSearchTerm(''); setFilter('all');}}
+              className="mt-4 text-blue-600 hover:text-blue-800 text-sm font-medium"
+             >
+               Clear all filters
+             </button>
           </motion.div>
-
-          {/* <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Recovery Rate</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{stats.recoveryRate}%</p>
-              </div>
-              <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
-                <Target className="text-emerald-600" size={24} />
-              </div>
-            </div>
-            <div className="flex items-center mt-4 text-sm">
-              <ArrowUpRight size={16} className="text-green-500 mr-1" />
-              <span className="text-green-600 font-medium">Industry leading</span>
-            </div>
-          </motion.div> */}
-
-          {/* <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Successful Matches</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{stats.matchesMade}</p>
-              </div>
-              <div className="w-12 h-12 bg-violet-100 rounded-xl flex items-center justify-center">
-                <Users className="text-violet-600" size={24} />
-              </div>
-            </div>
-            <div className="flex items-center mt-4 text-sm">
-              <Bell size={16} className="text-blue-500 mr-1" />
-              <span className="text-blue-600 font-medium">+3 today</span>
-            </div>
-          </motion.div> */}
-                  {/* Search & Filter */}
-            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 ">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex-1 relative">
-                  <Search
-                    size={20}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Search items by title, description, or location..."
-                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <Filter size={20} className="text-gray-500" />
-                    <select
-                      className="border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      value={filter}
-                      onChange={(e) =>
-                        setFilter(e.target.value as 'all' | 'lost' | 'found')
-                      }
-                    >
-                      <option value="all">All Items</option>
-                      <option value="lost">Lost Items</option>
-                      <option value="found">Found Items</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick Filters */}
-              <div className="flex flex-wrap gap-2 mt-4">
-                {['all', 'active', 'pending', 'resolved'].map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                      activeTab === tab
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                  </button>
-                ))}
-              </div>
-            </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Posts Feed */}
-          <div className="lg:col-span-2">
-    
-
-            {/* Posts Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {filteredPosts.map((post, index) => (
+        ) : (
+          <motion.div layout className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'flex flex-col gap-4'}>
+            <AnimatePresence>
+              {filteredPosts.map((post) => (
                 <motion.div
+                  layout
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
                   key={post.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="group bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300"
+                  className={`group bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-slate-200/50 hover:border-blue-200 transition-all duration-300 ${
+                    viewMode === 'list' ? 'flex flex-row items-center h-40' : 'flex flex-col'
+                  }`}
                 >
-                  {/* Post Header */}
-                  <div className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center space-x-3">
-                        <div className={`w-20 h-7 ${getTypeColor(post.type)} rounded-xl flex items-center justify-center text-white font-bold`}>
-                          {post.type === 'lost' ? 'Lost' : 'Found'}
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
-                            {post.title}
-                          </h3>
-                          <div className="flex items-center mt-1">
-                            <div className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(post.status)}`}>
-                            </div>
-                            {post.matchScore && (
-                              <div className="ml-2 px-2 py-1 bg-linear-to-r from-amber-100 to-yellow-100 text-amber-800 text-xs font-medium rounded-full">
-                                {post.matchScore}% Match
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm text-gray-500">
-                          <Clock size={14} className="inline mr-1" />
-                          {post.date}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Description */}
-                    <p className="text-gray-600 mb-4 line-clamp-2">
-                      {post.description}
-                    </p>
-
-                    {/* Location & User */}
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center text-gray-600">
-                        <MapPin size={16} className="mr-2" />
-                        {post.location}
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-6 h-6 bg-linear-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white text-xs mr-2">
-                          {post.user.name.charAt(0)}
-                        </div>
-                        <span className="text-gray-700">{post.user.name}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Image & Actions */}
-                  <div className="relative">
-                    {post.imageUrl && (
-                      <div className="h-48 overflow-hidden">
-                        <img
-                          src={post.imageUrl}
-                          alt={post.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                        {/* <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent"></div> */}
+                  {/* Card Image */}
+                  <div className={`relative overflow-hidden bg-slate-100 ${viewMode === 'list' ? 'w-48 h-full shrink-0' : 'h-48 w-full'}`}>
+                    {post.imageUrl ? (
+                      <img src={post.imageUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={post.title} />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-300">
+                        <Box size={40} strokeWidth={1} />
+                        <span className="text-xs font-medium mt-2">No Image</span>
                       </div>
                     )}
                     
-                    <div className="p-6 pt-4">
-                      <div className="flex items-center justify-between">
-                        <button className="flex-1 mr-2 py-3 bg-linear-to-r from-blue-600 to-cyan-600 text-white rounded-xl hover:shadow-lg transition-all flex items-center justify-center">
-                          <Eye size={18} className="mr-2" />
-                          View Details
-                        </button>
-                        <button className="p-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors">
-                          <MessageSquare size={18} />
-                        </button>
+                    {/* Status Badge */}
+                    <div className="absolute top-3 left-3 flex gap-2">
+                      <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide border shadow-sm backdrop-blur-md ${
+                        post.type === 'lost' 
+                          ? 'bg-white/90 text-rose-600 border-rose-100' 
+                          : 'bg-white/90 text-emerald-600 border-emerald-100'
+                      }`}>
+                        {post.type}
+                      </span>
+                    </div>
+
+                    {/* Match Score Badge */}
+                    {post.matchScore && (
+                       <div className="absolute bottom-3 right-3 px-2 py-1 bg-slate-900/90 backdrop-blur-sm text-white text-xs font-bold rounded flex items-center gap-1 shadow-lg">
+                         <Zap size={10} className="text-yellow-400" fill="currentColor" />
+                         {post.matchScore}% MATCH
+                       </div>
+                    )}
+                  </div>
+
+                  {/* Card Body */}
+                  <div className="p-5 flex flex-col flex-1 w-full relative">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1 text-base">
+                        {post.title}
+                      </h3>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold border uppercase shrink-0 ${
+                         post.status === 'resolved' ? 'bg-green-50 text-green-700 border-green-100' :
+                         post.status === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                         'bg-blue-50 text-blue-700 border-blue-100'
+                      }`}>
+                        {post.status}
+                      </span>
+                    </div>
+                    
+                    <p className={`text-sm text-slate-500 mb-4 ${viewMode === 'list' ? 'line-clamp-2' : 'line-clamp-2'}`}>
+                      {post.description}
+                    </p>
+                    
+                    <div className="mt-auto flex items-center justify-between pt-4 border-t border-slate-100">
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                          <MapPin size={12} className="text-slate-400" />
+                          <span className="truncate max-w-[120px]">{post.location}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                          <Clock size={12} />
+                          <span>{post.date}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-xs font-bold shadow-sm">
+                          {post.user.name.charAt(0)}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </motion.div>
               ))}
-            </div>
-
-            {filteredPosts.length === 0 && (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-center py-16 bg-white rounded-2xl shadow-lg border border-gray-100"
-              >
-                <div className="w-20 h-20 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
-                  <Search className="text-gray-400" size={32} />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  No items found
-                </h3>
-                <p className="text-gray-600 max-w-md mx-auto">
-                  Try adjusting your search or filter to find what you're looking for.
-                </p>
-              </motion.div>
-            )}
-          </div>
-
-          {/* Right Column - Sidebar */}
-          <div className="space-y-6">
-            {/* Quick Stats */}
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-linear-to-br from-blue-600 to-cyan-600 rounded-2xl p-6 text-white shadow-lg"
-            >
-              <h3 className="font-bold text-lg mb-6 flex items-center">
-                <PieChart className="mr-3" size={20} />
-                Quick Insights
-              </h3>
-              
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-blue-100">Lost Items</span>
-                  <span className="font-bold">{stats.lostItems}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-blue-100">Found Items</span>
-                  <span className="font-bold">{stats.foundItems}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-blue-100">Active Users</span>
-                  <span className="font-bold">{stats.activeUsers}</span>
-                </div>
-                {/* <div className="flex items-center justify-between">
-                  <span className="text-blue-100">Today's Activity</span>
-                  <span className="font-bold">+14</span>
-                </div> */}
-              </div>
-              
-              <div className="mt-8 pt-6 border-t border-blue-500/30">
-                <div className="flex items-center text-sm">
-                  <Shield size={16} className="mr-2" />
-                  <span>Algorithm matching accuracy: 92%</span>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </div>
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </main>
     </div>
   );
 }

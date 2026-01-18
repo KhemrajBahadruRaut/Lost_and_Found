@@ -1,629 +1,572 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { Search, Upload, Bell, Shield, CheckCircle, MapPin, Users, Sparkles, ChevronRight, ArrowRight, Star, ShieldCheck, Eye, Clock, TrendingUp, Globe, Award, Zap, Lock, MessageSquare, Download, BarChart, Users as UsersIcon, Target } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
-import CountUp from 'react-countup';
+import Link from "next/link";
+import {
+  Search,
+  Shield,
+  CheckCircle,
+  Database,
+  ArrowRight,
+  Menu,
+  X,
+  Terminal,
+  Activity,
+  FileText,
+  Lock,
+  EyeOff,
+  FileKey,
+  Server,
+  Workflow,
+  ChevronRight,
+  UserCheck,
+} from "lucide-react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function MainPage() {
-  const [stats, setStats] = useState({ itemsFound: 0, happyUsers: 0, cities: 0, successRate: 0 });
-  const [activeFeature, setActiveFeature] = useState(0);
-  const [isLiveData, setIsLiveData] = useState(false);
-  const statsRef = useRef(null);
-  const isInView = useInView(statsRef, { once: true });
-  
-  // Simulate live data updates
+  const [activeModule, setActiveModule] = useState(0);
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Handle scroll for navbar styling
   useEffect(() => {
-    // Initial stats animation
-    const timer = setTimeout(() => {
-      setStats({
-        itemsFound: 12789,
-        happyUsers: 9562,
-        cities: 243,
-        successRate: 78.5
-      });
-    }, 1000);
-    
-    // Feature auto rotation
-    const featureInterval = setInterval(() => {
-      setActiveFeature(prev => (prev + 1) % 4);
-    }, 5000);
-    
-    // Simulate live data updates
-    const liveDataInterval = setInterval(() => {
-      if (isLiveData) {
-        setStats(prev => ({
-          itemsFound: prev.itemsFound + Math.floor(Math.random() * 3),
-          happyUsers: prev.happyUsers + Math.floor(Math.random() * 2),
-          cities: prev.cities,
-          successRate: prev.successRate + (Math.random() - 0.5) * 0.1
-        }));
-      }
-    }, 3000);
-    
-    return () => {
-      clearTimeout(timer);
-      clearInterval(featureInterval);
-      clearInterval(liveDataInterval);
-    };
-  }, [isLiveData]);
-  
-  const features = [
-    {
-      icon: <Upload className="text-blue-600" size={24} />,
-      title: "Algorithm based Item Reporting",
-      description: "Advanced reporting system with algo based description generation",
-      color: "from-blue-500 to-blue-600",
-      bgColor: "bg-blue-50",
-      details: [
-        "Algorithm based description suggestions",
-        "Multiple photo upload with auto-categorization",
-        "Real-time location mapping",
-        "Smart category detection"
-      ],
-      stats: "Reports completed in under 2 minutes"
-    },
-    {
-      icon: <Search className="text-emerald-600" size={24} />,
-      title: "Algorithm based Matching",
-      description: "Proprietary algorithm with 94% match accuracy",
-      color: "from-emerald-500 to-emerald-600",
-      bgColor: "bg-emerald-50",
-      details: [
-        "Computer vision image analysis",
-        "Natural language processing",
-        "Geospatial pattern recognition",
-        "Historical match learning"
-      ],
-      stats: "Processes 500+ matches per hour"
-    },
-    {
-      icon: <Bell className="text-violet-600" size={24} />,
-      title: "Real-time Notifications",
-      description: "Multi-channel alert system with priority routing",
-      color: "from-violet-500 to-violet-600",
-      bgColor: "bg-violet-50",
-      details: [
-        "Smart priority notifications",
-        "Multi-channel delivery (SMS/Email/Push)",
-        "Status tracking dashboard",
-        "Custom notification schedules"
-      ],
-      stats: "Average response time: 12 minutes"
-    },
-    {
-      icon: <Shield className="text-amber-600" size={24} />,
-      title: "Secure Verification",
-      description: "Enterprise-grade security with blockchain verification",
-      color: "from-amber-500 to-amber-600",
-      bgColor: "bg-amber-50",
-      details: [
-        "Two-factor authentication",
-        "Encrypted communication channels",
-        "Digital proof of ownership"
-      ],
-      stats: "Zero security incidents to date"
-    }
-  ];
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-  const testimonials = [
+  const modules = [
     {
-      name: "Sarah Chen",
-      role: "CTO, TechCorp Inc.",
-      content: "Lost my corporate laptop during a business trip. FynDR's geofencing feature pinpointed its location, and the verification process ensured secure return within 6 hours.",
-      avatarColor: "bg-linear-to-br from-blue-500 to-cyan-500",
-      rating: 5,
-      company: "Fortune 500 Company",
-      item: "Corporate Laptop",
-      time: "Recovered in 6 hours"
+      id: "input",
+      icon: <FileText size={20} />,
+      title: "Data Entry Module",
+      description: "Structured forms for logging lost or found item metadata.",
+      color: "blue",
+      specs: ["Image Upload", "Categorization", "Timestamping"],
     },
     {
-      name: "Marcus Rodriguez",
-      role: "University Professor",
-      content: "A student found my research documents containing sensitive data. The encrypted return process and chain-of-custody tracking gave me complete peace of mind.",
-      avatarColor: "bg-linear-to-br from-emerald-500 to-green-500",
-      rating: 5,
-      company: "Stanford University",
-      item: "Research Documents",
-      time: "Secure return in 24h"
-    },
-    {
-      name: "Priya Sharma",
-      role: "International Traveler",
-      content: "Left my passport in a Dubai airport lounge. The international match network connected me with airport security, and I had it back before my connecting flight.",
-      avatarColor: "bg-linear-to-br from-violet-500 to-purple-500",
-      rating: 5,
-      company: "Frequent Flyer",
-      item: "Passport & Documents",
-      time: "International recovery"
-    }
-  ];
-
-  const processSteps = [
-    { 
-      step: 1, 
-      title: "Reporting", 
-      description: "Use our Algorithm to create detailed reports",
-      icon: <Zap className="text-blue-600" size={24} />,
-      time: "2 minutes avg.",
-      accuracy: "98% detail accuracy"
-    },
-    { 
-      step: 2, 
-      title: "Algorithm Analysis", 
-      description: "Our system processes and matches using multiple data points",
-      icon: <Target className="text-emerald-600" size={24} />,
-      time: "Instant matching",
-      accuracy: "94% match rate"
-    },
-    { 
-      step: 3, 
-      title: "Secure Connect", 
-      description: "Verified communication through our secure platform",
-      icon: <MessageSquare className="text-violet-600" size={24} />,
-      time: "Admin connect the users",
-      accuracy: "Analyzes"
-    },
-    { 
-      step: 4, 
-      title: "Verified Transfer", 
-      description: "Transfer with digital receipt",
-      icon: <CheckCircle className="text-amber-600" size={24} />,
-      time: "Delivery tracked by Admin",
-      accuracy: "100% verification"
+      id: "logic",
+      icon: <Activity size={20} />,
+      title: "Comparison Logic",
+      description:
+        "The backend algorithm compares new entries against existing records.",
+      color: "indigo",
+      specs: ["String Matching", "Date Filtering", "Location Radius"],
     },
   ];
 
-  const partners = [
-    { name: "Airport Security", count: "42 airports" },
-    { name: "Hotel Chains", count: "150+ locations" },
-    { name: "Ride Sharing", count: "3 major partners" },
-    { name: "Public Transport", count: "18 cities" },
-    { name: "Shopping Malls", count: "75+ centers" },
-    { name: "Universities", count: "28 campuses" },
+  const workflowSteps = [
+    {
+      step: "01",
+      title: "Data Ingestion",
+      desc: "User submits a structured report (Lost or Found) into the SQL database.",
+      icon: <Database size={20} />,
+    },
+    {
+      step: "02",
+      title: "Algorithmic Processing",
+      desc: "System runs a query to identify overlapping parameters (Title, Category, Loc).",
+      icon: <Activity size={20} />,
+    },
+    {
+      step: "03",
+      title: "Notification Trigger",
+      desc: "If Similarity Index > 30%, both parties receive a potential match alert.",
+      icon: <Workflow size={20} />,
+    },
+    {
+      step: "04",
+      title: "Physical Handover",
+      desc: "Identity is verified at the admin desk and item status is updated to 'Resolved'.",
+      icon: <UserCheck size={20} />,
+    },
   ];
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-blue-50/30 overflow-hidden">
-      {/* Animated background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-linear-to-br from-blue-200/20 to-cyan-200/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-1/3 -left-40 w-96 h-96 bg-linear-to-br from-violet-200/20 to-purple-200/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute bottom-1/4 right-1/3 w-80 h-80 bg-linear-to-br from-emerald-200/20 to-green-200/20 rounded-full blur-3xl animate-pulse delay-500"></div>
-      </div>
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden scroll-smooth">
+      {/* --- Technical Grid Background --- */}
+      <div
+        className="fixed inset-0 z-0 pointer-events-none opacity-[0.4]"
+        style={{
+          backgroundImage:
+            "linear-gradient(#cbd5e1 1px, transparent 1px), linear-gradient(90deg, #cbd5e1 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
+        }}
+      />
 
-      {/* Navigation */}
-      <header className="relative z-50 backdrop-blur-sm bg-white/90 border-b border-gray-200/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-3">
-              <div className="bg-linear-to-br from-blue-600 to-cyan-600 p-2 rounded-xl shadow-lg">
-                <Search className="text-white" size={28} />
-              </div>
-              <div>
-                <span className="text-2xl font-bold bg-linear-to-br from-blue-700 to-cyan-700 bg-clip-text text-transparent">
-                  FynDR
-                </span>
-                <div className="flex items-center space-x-1">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-xs text-gray-500 font-medium">Live • 12 items recovered</span>
-                </div>
-              </div>
-            </div>            
-            <div className="flex items-center space-x-4">
-              <Link 
-                href="/demo"
-                className="hidden md:inline-flex items-center text-sm text-gray-700 hover:text-blue-600 font-medium px-4 py-2 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <Eye size={16} className="mr-2" />
-                View Demo
-              </Link>
-              <Link 
-                href="/auth"
-                className="text-blue-600 hover:text-blue-800 font-semibold transition-colors text-sm"
-              >
-                Sign In
-              </Link>
-              <Link 
-                href="/auth"
-                className="bg-linear-to-br from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold px-6 py-3 rounded-xl transition-all hover:shadow-lg text-sm shadow-md"
-              >
-                Get Started Free
-              </Link>
+      {/* --- Navbar --- */}
+      <nav
+        className={`fixed w-full z-50 transition-all duration-200 ${
+          scrolled
+            ? "bg-white/90 backdrop-blur-sm border-b border-slate-200 py-3"
+            : "bg-transparent py-5"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-slate-900 rounded flex items-center justify-center text-white">
+              <Terminal size={18} />
             </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Hero Section */}
-      <section className="relative z-10 pt-16 pb-8 md:pt-20 md:pb-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center space-x-2 bg-linear-to-br from-blue-50 to-cyan-50 border border-blue-200 text-blue-700 px-4 py-2 rounded-full mb-8 shadow-sm"
-            >
-              <TrendingUp size={16} />
-              <span className="font-semibold text-sm">92% recovery rate for reported items</span>
-            </motion.div>
-            
-            <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-8 leading-tight tracking-tight"
-            >
-              Algorithm Based
-              <br />
-              <span className="bg-linear-to-br from-blue-600 via-cyan-600 to-blue-600 bg-clip-text text-transparent">
-                Lost & Found Platform
+            <div className="flex flex-col">
+              <span className="text-lg font-bold tracking-tight text-slate-900 leading-none">
+                FynDR
               </span>
-            </motion.h1>
-            
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed"
-            >
-              Powered by Kathford Students. 
-              The most advanced platform for recovering lost assets with military-grade security.
-            </motion.p>
-            
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6 mb-16"
-            >
-              <Link 
-                href="/auth"
-                className="group relative bg-linear-to-br from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold px-10 py-5 rounded-xl text-lg transition-all duration-300 hover:shadow-2xl hover:scale-105 flex items-center shadow-lg"
-              >
-                <div className="absolute inset-0 bg-linear-to-br from-white/10 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <span className="relative">Start Free Trial</span>
-                <ArrowRight className="ml-3 relative group-hover:translate-x-2 transition-transform" size={20} />
-              </Link>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Process Flow */}
-      <section className="relative z-10 py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Enterprise Recovery Workflow
-            </h2>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              From discovery to delivery - our certified process ensures maximum recovery rates
-            </p>
-          </div>
-          
-          <div className="relative">
-            <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-0.5 bg-linear-to-br from-blue-200 via-emerald-200 to-violet-200 transform -translate-y-1/2"></div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {processSteps.map((step, index) => (
-                <motion.div 
-                  key={step.step}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="relative"
-                >
-                  <div className="relative bg-white rounded-2xl p-8 shadow-xl border border-gray-100 h-full hover:shadow-2xl transition-all duration-300 group">
-                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-linear-to-br from-blue-600 to-cyan-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-                      {step.icon}
-                    </div>
-                    
-                    <div className="pt-8">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-xl font-bold text-gray-900">{step.title}</h3>
-                        <div className="text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                          Step {step.step}
-                        </div>
-                      </div>
-                      
-                      <p className="text-gray-600 mb-6">{step.description}</p>
-                      
-                      <div className="space-y-2">
-                        <div className="flex items-center text-sm text-gray-500">
-                          <Clock size={14} className="mr-2" />
-                          {step.time}
-                        </div>
-                        <div className="flex items-center text-sm text-gray-500">
-                          <Target size={14} className="mr-2" />
-                          {step.accuracy}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">
+                System V1.0
+              </span>
             </div>
           </div>
+
+          <div className="hidden md:flex items-center space-x-8 text-sm font-medium font-mono text-slate-600">
+            <a href="#workflow" className="hover:text-slate-900">
+              /Workflow
+            </a>
+            <a href="#modules" className="hover:text-slate-900">
+              /Architecture
+            </a>
+          </div>
+
+          <div className="hidden md:flex items-center gap-4">
+            <Link
+              href="/auth"
+              className="text-sm font-semibold text-slate-600 hover:text-slate-900"
+            >
+              Login
+            </Link>
+            <Link
+              href="/auth"
+              className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold rounded shadow-lg shadow-slate-900/20 transition-transform active:scale-95 flex items-center gap-2"
+            >
+              Get Started <ArrowRight size={14} />
+            </Link>
+          </div>
+
+          <button
+            className="md:hidden text-slate-900"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
-      </section>
 
-      {/* Advanced Features */}
-      <section className="relative z-10 py-20 bg-linear-to-b from-white to-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            
-            {/* Feature List */}
-            <div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                Advanced Recovery Technology
-              </h2>
-              
-              <div className="space-y-6">
-                {features.map((feature, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className={`
-                      relative bg-white rounded-xl p-6 border-l-4 transition-all duration-300
-                      ${activeFeature === index 
-                        ? 'border-blue-500 shadow-xl transform -translate-y-1' 
-                        : 'border-gray-200 hover:shadow-lg'
-                      }
-                    `}
-                    onMouseEnter={() => setActiveFeature(index)}
-                  >
-                    <div className="flex items-start">
-                      <div className={`${feature.bgColor} w-12 h-12 rounded-lg flex items-center justify-center mr-4`}>
-                        {feature.icon}
-                      </div>
-                      
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="font-bold text-gray-900">{feature.title}</h3>
-                          {activeFeature === index && (
-                            <div className="flex items-center">
-                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></div>
-                              <span className="text-xs font-semibold text-green-600">ACTIVE</span>
-                            </div>
-                          )}
-                        </div>
-                        
-                        <p className="text-gray-600 mb-3">{feature.description}</p>
-                        
-                        <ul className="space-y-2">
-                          {feature.details.map((detail, i) => (
-                            <li key={i} className="flex items-center text-sm text-gray-500">
-                              <div className="w-1 h-1 bg-gray-400 rounded-full mr-2"></div>
-                              {detail}
-                            </li>
-                          ))}
-                        </ul>
-                        
-                        <div className="mt-4 text-sm font-medium text-gray-700">
-                          {feature.stats}
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-
-            {/* Feature Visualization */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
             <motion.div
-              key={activeFeature}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="relative"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="md:hidden bg-white border-b border-slate-200 overflow-hidden"
             >
-              <div className="bg-linear-to-br from-gray-900 to-gray-800 rounded-3xl p-10 shadow-2xl">
-                <div className="text-white mb-8">
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center">
-                      <div className={`${features[activeFeature].bgColor} w-12 h-12 rounded-lg flex items-center justify-center mr-4`}>
-                        {features[activeFeature].icon}
-                      </div>
-                      <div>
-                        <h3 className="text-2xl font-bold">{features[activeFeature].title}</h3>
-                        <div className="text-gray-300 text-sm mt-1">Real-time System Dashboard</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs text-gray-400">PERFORMANCE</div>
-                      <div className="text-xl font-bold text-green-400">94.2%</div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-gray-800/50 rounded-xl p-6 mb-6">
-                    <div className="flex justify-between items-center mb-4">
-                      <div className="text-gray-300">Active Processes</div>
-                      <div className="text-green-400 text-sm font-medium">Optimal</div>
-                    </div>
-                    <div className="space-y-3">
-                      {[75, 82, 68, 91].map((width, i) => (
-                        <div key={i}>
-                          <div className="flex justify-between text-sm mb-1">
-                            <span className="text-gray-400">Process {i + 1}</span>
-                            <span className="text-gray-300">{width}%</span>
-                          </div>
-                          <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                            <motion.div 
-                              className="h-full bg-linear-to-br from-blue-500 to-cyan-500"
-                              initial={{ width: 0 }}
-                              animate={{ width: `${width}%` }}
-                              transition={{ duration: 1, delay: 0.2 }}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-gray-800/50 rounded-xl p-4">
-                      <div className="text-gray-400 text-sm">Matches/Hour</div>
-                      <div className="text-2xl font-bold text-white">512</div>
-                    </div>
-                    <div className="bg-gray-800/50 rounded-xl p-4">
-                      <div className="text-gray-400 text-sm">Avg. Response</div>
-                      <div className="text-2xl font-bold text-white">12m</div>
-                    </div>
-                    <div className="bg-gray-800/50 rounded-xl p-4">
-                      <div className="text-gray-400 text-sm">Accuracy</div>
-                      <div className="text-2xl font-bold text-green-400">94%</div>
-                    </div>
-                    <div className="bg-gray-800/50 rounded-xl p-4">
-                      <div className="text-gray-400 text-sm">Uptime</div>
-                      <div className="text-2xl font-bold text-green-400">99.9%</div>
-                    </div>
-                  </div>
+              <div className="p-6 space-y-4 font-mono">
+                <a
+                  href="#workflow"
+                  className="block text-slate-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  /Workflow
+                </a>
+                <a
+                  href="#modules"
+                  className="block text-slate-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  /Architecture
+                </a>
+                <Link href="/auth" className="block text-blue-600 font-bold">
+                  Get Started
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </nav>
+
+      {/* --- Hero Section --- */}
+      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 z-10">
+        <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-blue-50 border border-blue-200 text-blue-700 text-xs font-mono font-bold uppercase tracking-wider mb-6">
+              <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+              System Online
+            </div>
+            <h1 className="text-5xl lg:text-6xl font-extrabold text-slate-900 mb-6 leading-tight tracking-tight">
+              Algorithm Based <br />
+              <span className="text-blue-600">Lost & Found</span> Platform.
+            </h1>
+
+            <p className="text-lg text-slate-500 mb-8 max-w-xl leading-relaxed">
+              An algorithm-driven platform for reporting and retrieving lost
+              items. We utilize data matching to connect lost assets with their
+              owners efficiently.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link
+                href="/auth"
+                className="px-8 py-2 bg-blue-600 hover:bg-blue-500 text-white text-base font-bold rounded flex justify-center items-center gap-2 transition-all shadow-xl shadow-blue-500/20"
+              >
+                <FileText size={18} /> Submit Found
+              </Link>
+              <Link
+                href="/auth"
+                className="px-8 py-2 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-base font-bold rounded flex justify-center items-center gap-2 transition-all"
+              >
+                <Search size={18} /> Search Lost
+              </Link>
+            </div>
+            {/* 
+            <div className="mt-10 flex items-center gap-8 text-xs font-mono text-slate-500">
+               <div>
+                 <span className="block text-2xl font-bold text-slate-900">1.2k+</span>
+                 RECORDS_LOGGED
+               </div>
+               <div className="h-8 w-px bg-slate-300" />
+               <div>
+                 <span className="block text-2xl font-bold text-slate-900">89%</span>
+                 MATCH_RATE
+               </div>
+            </div> */}
+          </motion.div>
+
+          {/* System Console Visual */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="relative"
+          >
+            <div className="bg-slate-900 rounded-lg shadow-2xl overflow-hidden border border-slate-700 font-mono text-sm">
+              <div className="bg-slate-800 px-4 py-3 border-b border-slate-700 flex items-center justify-between">
+                <div className="flex gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500" />
+                  <div className="w-3 h-3 rounded-full bg-amber-500/20 border border-amber-500" />
+                  <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500" />
+                </div>
+                <div className="text-slate-400 text-xs">fyndr_core.exe</div>
+              </div>
+
+              <div className="p-6 text-slate-300 space-y-3 h-80 overflow-hidden relative">
+                <div className="opacity-50 text-xs border-b border-slate-700 pb-2 mb-4">
+                  // INITIALIZING DATABASE CONNECTION...{" "}
+                  <span className="text-green-400">OK</span>
+                  <br />
+                  // LOADING MATCHING ALGORITHM...{" "}
+                  <span className="text-green-400">OK</span>
+                </div>
+                <div className="flex gap-3 items-start animate-pulse">
+                  <span className="text-blue-400 shrink-0">[INPUT]</span>
+                  <span>New Report: "Blue Wallet" at Library (ID: #4092)</span>
+                </div>
+                <div className="flex gap-3 items-start">
+                  <span className="text-purple-400 shrink-0">[QUERY]</span>
+                  <span>Scanning found_items table for matches...</span>
+                </div>
+                <div className="flex gap-3 items-start bg-green-900/20 p-2 rounded border border-green-900/50">
+                  <span className="text-green-400 shrink-0">[MATCH]</span>
+                  <span>
+                    Potential Match Found (Score: 92%)
+                    <br />
+                    <span className="text-slate-500 text-xs mt-1 block">
+                      Ref: Leather Wallet found in Block A
+                    </span>
+                  </span>
+                </div>
+                <div className="flex gap-3 items-start opacity-70">
+                  <span className="text-slate-500 shrink-0">[WAIT]</span>
+                  <span>Awaiting User Verification...</span>
+                </div>
+                <div className="absolute bottom-4 left-6 flex items-center gap-2">
+                  <span className="text-green-500">➜</span>
+                  <span className="w-2 h-4 bg-green-500 animate-pulse" />
                 </div>
               </div>
-              
-              <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-linear-to-br from-blue-500/20 to-cyan-500/20 rounded-full blur-xl"></div>
-            </motion.div>
-          </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* Enterprise Testimonials */}
-      <section className="relative z-10 py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center space-x-2 bg-linear-to-br from-blue-50 to-cyan-50 text-blue-700 px-4 py-2 rounded-full mb-4">
-              <Award size={16} />
-              <span className="font-semibold">Enterprise Case Studies</span>
+      {/* --- Operational Workflow --- */}
+      <section
+        id="workflow"
+        className="py-24 bg-white border-t border-slate-200"
+      >
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+            <div>
+              <h2 className="text-3xl font-bold text-slate-900 mb-2">
+                Operational Workflow
+              </h2>
+              <p className="text-slate-500 max-w-lg">
+                Standard Operating Procedure (SOP) for asset recovery.
+              </p>
             </div>
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Trusted by Industry Leaders
-            </h2>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              See how major organizations leverage our platform for asset recovery
-            </p>
+            <div className="text-right hidden md:block">
+              <span className="text-xs font-mono text-slate-400 border border-slate-200 px-2 py-1 rounded">
+                SEQUENCE_V2
+              </span>
+            </div>
           </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <motion.div 
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="group relative bg-linear-to-br from-white to-gray-50 rounded-2xl p-8 shadow-xl border border-gray-200 hover:shadow-2xl transition-all duration-300"
-              >
-                <div className="absolute top-0 right-0 transform translate-x-4 -translate-y-4">
-                  <div className="bg-linear-to-br from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-xl shadow-lg">
-                    <div className="text-sm font-semibold">Case Study</div>
-                  </div>
-                </div>
-                
-                <div className="flex items-center mb-6">
-                  <div className={`${testimonial.avatarColor} w-14 h-14 rounded-xl flex items-center justify-center text-white font-bold text-xl mr-4 shadow-md`}>
-                    {testimonial.name.charAt(0)}
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gray-900">{testimonial.name}</h4>
-                    <p className="text-blue-600 font-medium">{testimonial.role}</p>
-                    <div className="text-sm text-gray-500">{testimonial.company}</div>
-                  </div>
-                </div>
-                
-                <p className="text-gray-700 mb-6 leading-relaxed">"{testimonial.content}"</p>
-                
-                <div className="border-t border-gray-200 pt-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <div className="flex text-yellow-400">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} size={18} fill="currentColor" />
-                      ))}
+
+          <div className="grid md:grid-cols-4 gap-8">
+            {workflowSteps.map((item, i) => (
+              <div key={i} className="relative group">
+                {/* Connector Line */}
+                {i !== workflowSteps.length - 1 && (
+                  <div className="hidden md:block absolute top-8 left-1/2 w-full h-px bg-slate-200 -z-10" />
+                )}
+
+                <div className="bg-white p-6 rounded border border-slate-200 hover:border-blue-400 hover:shadow-lg transition-all duration-300 h-full">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-4xl font-mono font-bold text-slate-100 group-hover:text-blue-50 transition-colors">
+                      {item.step}
+                    </span>
+                    <div className="w-10 h-10 rounded bg-slate-50 flex items-center justify-center text-slate-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                      {item.icon}
                     </div>
-                    <div className="text-sm font-medium text-blue-600">{testimonial.item}</div>
                   </div>
-                  <div className="flex items-center text-sm text-gray-500">
-                    <Clock size={14} className="mr-2" />
-                    {testimonial.time}
-                  </div>
+                  <h3 className="font-bold text-slate-900 mb-2">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-slate-500 leading-relaxed">
+                    {item.desc}
+                  </p>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="relative z-10 pt-16 pb-10 bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
-            <div className="lg:col-span-2">
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="bg-linear-to-br from-blue-600 to-cyan-600 p-2 rounded-xl">
-                  <Search className="text-white" size={28} />
-                </div>
-                <div>
-                  <span className="text-2xl font-bold">FynDR Enterprise</span>
-                  <div className="text-gray-400 text-sm">Global Asset Recovery Platform</div>
-                </div>
+      {/* --- System Modules (Tabs) --- */}
+      <section
+        id="modules"
+        className="py-24 bg-slate-50 border-y border-slate-200"
+      >
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">
+              System Architecture
+            </h2>
+            <p className="text-slate-500">
+              The platform operates on a three-stage pipeline to ensure data
+              accuracy.
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-12 gap-12">
+            {/* Tab Navigation */}
+            <div className="lg:col-span-4 space-y-2">
+              {modules.map((mod, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setActiveModule(idx)}
+                  className={`w-full text-left p-5 rounded border-l-4 transition-all duration-300 group ${
+                    activeModule === idx
+                      ? `bg-white border-${mod.color}-600 shadow-sm`
+                      : "bg-transparent border-transparent hover:bg-white/50 hover:border-slate-300"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span
+                      className={`font-bold ${activeModule === idx ? "text-slate-900" : "text-slate-600"}`}
+                    >
+                      {mod.title}
+                    </span>
+                    {activeModule === idx && (
+                      <ArrowRight
+                        size={16}
+                        className={`text-${mod.color}-600`}
+                      />
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-400 line-clamp-1">
+                    {mod.description}
+                  </p>
+                </button>
+              ))}
+            </div>
+
+            {/* Tab Content Display */}
+            <div className="lg:col-span-8">
+              <div className="h-full bg-slate-900 rounded-lg border border-slate-800 p-8 md:p-12 relative overflow-hidden flex flex-col justify-center min-h-[400px]">
+                {/* Background Grid inside card */}
+                <div
+                  className="absolute inset-0 opacity-20"
+                  style={{
+                    backgroundImage:
+                      "radial-gradient(#64748b 1px, transparent 1px)",
+                    backgroundSize: "20px 20px",
+                  }}
+                />
+
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeModule}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                    className="relative z-10"
+                  >
+                    <div
+                      className={`w-14 h-14 rounded bg-${modules[activeModule].color}-600 flex items-center justify-center text-white mb-6 shadow-lg shadow-${modules[activeModule].color}-900/50`}
+                    >
+                      {modules[activeModule].icon}
+                    </div>
+
+                    <h3 className="text-2xl font-mono font-bold text-white mb-4">
+                      {modules[activeModule].title}
+                    </h3>
+                    <p className="text-slate-400 text-lg mb-8 max-w-xl">
+                      {modules[activeModule].description}
+                    </p>
+
+                    <div className="grid sm:grid-cols-3 gap-4">
+                      {modules[activeModule].specs.map((spec, i) => (
+                        <div
+                          key={i}
+                          className="bg-slate-800/50 border border-slate-700 p-3 rounded text-sm text-slate-300 font-mono flex items-center gap-2"
+                        >
+                          <div
+                            className={`w-1.5 h-1.5 rounded-full bg-${modules[activeModule].color}-500`}
+                          />
+                          {spec}
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
               </div>
-              <p className="text-gray-400 max-w-md">
-                The world's most advanced lost & found platform, 
-                trusted by enterprises and organizations worldwide.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- Security Architecture --- */}
+      <section
+        id="security"
+        className="py-24 bg-slate-900 text-white relative overflow-hidden"
+      >
+        {/* Abstract shapes */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[100px]" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-emerald-600/10 rounded-full blur-[100px]" />
+
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <div className="mb-16">
+            <h2 className="text-3xl font-bold mb-4">Security Protocols</h2>
+            <p className="text-slate-400 max-w-2xl">
+              We enforce strict data privacy and identity verification measures.
+              Contact details are masked until a preliminary match is confirmed
+              by the system.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Security Card 1 */}
+            <div className="bg-slate-800/50 border border-slate-700 p-8 rounded hover:bg-slate-800 transition-colors">
+              <div className="w-12 h-12 bg-emerald-500/10 rounded flex items-center justify-center text-emerald-500 mb-6 border border-emerald-500/20">
+                <Lock size={24} />
+              </div>
+              <h3 className="text-xl font-bold mb-3">RBAC System</h3>
+              <p className="text-sm text-slate-400 leading-relaxed">
+                Role-Based Access Control limits sensitive database operations
+                to authorized administrators only. Students have read/write
+                access only to their own reports.
               </p>
             </div>
-            
+
+            {/* Security Card 2 */}
+            <div className="bg-slate-800/50 border border-slate-700 p-8 rounded hover:bg-slate-800 transition-colors">
+              <div className="w-12 h-12 bg-blue-500/10 rounded flex items-center justify-center text-blue-500 mb-6 border border-blue-500/20">
+                <EyeOff size={24} />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Data Masking</h3>
+              <p className="text-sm text-slate-400 leading-relaxed">
+                Personally Identifiable Information (PII) such as phone numbers
+                and email addresses are hidden from public search results to
+                prevent scraping.
+              </p>
+            </div>
+
+            {/* Security Card 3 */}
+            <div className="bg-slate-800/50 border border-slate-700 p-8 rounded hover:bg-slate-800 transition-colors">
+              <div className="w-12 h-12 bg-purple-500/10 rounded flex items-center justify-center text-purple-500 mb-6 border border-purple-500/20">
+                <FileKey size={24} />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Audit Trails</h3>
+              <p className="text-sm text-slate-400 leading-relaxed">
+                Every claim and status update creates an immutable log entry.
+                This ensures accountability during the physical handover of
+                assets.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- Footer --- */}
+      <footer className="bg-slate-50 pt-16 pb-8 border-t border-slate-200 text-slate-600 text-sm">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+            <div className="col-span-2">
+              <div className="flex items-center gap-2 mb-4 text-slate-900 font-bold">
+                <Terminal size={20} /> FynDR
+              </div>
+              <p className="max-w-xs text-slate-500">
+                Algorithm-based platform for efficient asset recovery and
+                database management.
+              </p>
+            </div>
             <div>
-              <h4 className="font-semibold text-lg mb-6">Platform</h4>
-              <ul className="space-y-3">
-                <li><Link href="/features" className="text-gray-400 hover:text-white transition-colors">Features</Link></li>
-                <li><Link href="/security" className="text-gray-400 hover:text-white transition-colors">Security</Link></li>
-                {/* <li><Link href="/api" className="text-gray-400 hover:text-white transition-colors">API Documentation</Link></li> */}
-                <li><Link href="/status" className="text-gray-400 hover:text-white transition-colors">System Status</Link></li>
+              <h4 className="font-bold text-slate-900 mb-4">Database</h4>
+              <ul className="space-y-2">
+                <li>
+                  <a
+                    href="/auth"
+                    className="hover:text-blue-600 hover:underline"
+                  >
+                    Lost Items
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/auth"
+                    className="hover:text-blue-600 hover:underline"
+                  >
+                    Found Items
+                  </a>
+                </li>
               </ul>
             </div>
-            
             <div>
-              <h4 className="font-semibold text-lg mb-6">Solutions</h4>
-              <ul className="space-y-3">
-                <li><Link href="/airports" className="text-gray-400 hover:text-white transition-colors">Airports</Link></li>
-                <li><Link href="/hotels" className="text-gray-400 hover:text-white transition-colors">Hotels</Link></li>
-                <li><Link href="/universities" className="text-gray-400 hover:text-white transition-colors">Universities</Link></li>
-                <li><Link href="/transportation" className="text-gray-400 hover:text-white transition-colors">Transportation</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold text-lg mb-6">Company</h4>
-              <ul className="space-y-3">
-                <li><Link href="/about" className="text-gray-400 hover:text-white transition-colors">About</Link></li>
-                <li><Link href="/careers" className="text-gray-400 hover:text-white transition-colors">Careers</Link></li>
-                <li><Link href="/contact" className="text-gray-400 hover:text-white transition-colors">Contact Sales</Link></li>
-                <li><Link href="/press" className="text-gray-400 hover:text-white transition-colors">Press</Link></li>
+              <h4 className="font-bold text-slate-900 mb-4">Admin</h4>
+              <ul className="space-y-2">
+                <li>
+                  <a
+                    href="/auth"
+                    className="hover:text-blue-600 hover:underline"
+                  >
+                    Dashboard Login
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-blue-600 hover:underline">
+                    System Status
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
-          
-          <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <div className="text-gray-400 text-sm mb-4 md:mb-0">
-              &copy; {new Date().getFullYear()} FynDR Technologies Inc. All rights reserved.
+          <div className="pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="font-mono text-xs text-slate-400">
+              © {new Date().getFullYear()} FynDR System. All rights reserved.
             </div>
-            
-            <div className="flex items-center space-x-6">
-              <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
-                Privacy Policy
-              </Link>
-              <Link href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
-                Terms of Service
-              </Link>
-              <Link href="/cookies" className="text-gray-400 hover:text-white text-sm transition-colors">
-                Cookie Policy
-              </Link>
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-sm text-gray-400">All systems operational</span>
-              </div>
+            <div className="font-mono text-xs text-slate-400">
+              STATUS: <span className="text-green-600">OPERATIONAL</span>
             </div>
           </div>
         </div>
