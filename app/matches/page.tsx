@@ -179,7 +179,7 @@ export default function Matches() {
                   {/* Lost Item */}
                   <div className="border-r pr-6">
                     <h3 className="text-lg font-semibold text-red-600 mb-3">Lost Item</h3>
-                    {match.lostPost.imageUrl && <img src={match.lostPost.imageUrl} alt={match.lostPost.title} className="w-full h-48 object-cover rounded-lg mb-3"/>}
+                    {match.lostPost.imageUrl && <img src={match.lostPost.imageUrl} alt={match.lostPost.title} className="w-full h-68 object-contain rounded-lg mb-3"/>}
                     <h4 className="font-semibold text-gray-900 mb-2">{match.lostPost.title}</h4>
                     <p className="text-gray-600 text-sm mb-3">{match.lostPost.description}</p>
                     
@@ -207,7 +207,7 @@ export default function Matches() {
                   {/* Found Item */}
                   <div className="pl-6">
                     <h3 className="text-lg font-semibold text-green-600 mb-3">Found Item</h3>
-                    {match.foundPost.imageUrl && <img src={match.foundPost.imageUrl} alt={match.foundPost.title} className="w-full h-48 object-cover rounded-lg mb-3"/>}
+                    {match.foundPost.imageUrl && <img src={match.foundPost.imageUrl} alt={match.foundPost.title} className="w-full h-68 object-contain rounded-lg mb-3"/>}
                     <h4 className="font-semibold text-gray-900 mb-2">{match.foundPost.title}</h4>
                     <p className="text-gray-600 text-sm mb-3">{match.foundPost.description}</p>
 

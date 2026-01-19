@@ -304,7 +304,7 @@ export default function DashboardPage() {
                   {/* Card Image */}
                   <div className={`relative overflow-hidden bg-slate-100 ${viewMode === 'list' ? 'w-48 h-full shrink-0' : 'h-48 w-full'}`}>
                     {post.imageUrl ? (
-                      <img src={post.imageUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={post.title} />
+                      <img src={post.imageUrl} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" alt={post.title} />
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center text-slate-300">
                         <Box size={40} strokeWidth={1} />
