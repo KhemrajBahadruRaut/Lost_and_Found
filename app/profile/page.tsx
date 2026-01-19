@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react';
 import { 
   User, Mail, Phone, Calendar, Package, Search, 
-  LogOut, MapPin, Shield, Edit3, Camera 
+  LogOut, Shield, Edit3, Camera 
 } from 'lucide-react';
-import Navbar from '@/components/layout/Navbar'; // Adjust path as needed
+import Navbar from '@/components/layout/Navbar';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 
@@ -44,19 +44,8 @@ export default function ProfilePage() {
       
       if (data.success) {
         setProfile(data.user);
-        
-        // --- CRITICAL FIX FOR NAVBAR ---
-        // Update localStorage with fresh data so Navbar sees the real name
-        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-        const updatedUser = { 
-          ...currentUser, 
-          name: data.user.full_name, // Map full_name to name for Navbar
-          email: data.user.email 
-        };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        
-        // Trigger a custom event so Navbar updates without reload
-        window.dispatchEvent(new Event('userUpdated')); 
+        // ❌ REMOVED: No longer need to update localStorage here
+        // Login already handles this properly
       }
     } catch (err) {
       console.error(err);
@@ -72,14 +61,13 @@ export default function ProfilePage() {
         credentials: 'include',
       });
       localStorage.clear();
-      window.dispatchEvent(new Event('userUpdated')); // Clear navbar
-      router.push('/login');
+      window.dispatchEvent(new Event('userUpdated'));
+      router.push('/');
     } catch (err) {
       console.error('Logout failed:', err);
     }
   };
 
-  // --- Loading Skeleton ---
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50/50">
@@ -99,7 +87,6 @@ export default function ProfilePage() {
       
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        {/* Page Header */}
         <motion.div 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -111,21 +98,18 @@ export default function ProfilePage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          {/* --- Left Column: Identity Card --- */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="lg:col-span-1"
           >
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden sticky top-24">
-              {/* Cover Gradient */}
-              <div className="h-32 bg-gradient-to-r from-blue-600 to-indigo-600 relative">
+              <div className="h-32 bg-linear-to-r from-blue-600 to-indigo-600 relative">
                 <div className="absolute top-4 right-4 text-white/80 hover:text-white cursor-pointer">
                   <Edit3 size={18} />
                 </div>
               </div>
 
-              {/* Avatar & Name */}
               <div className="px-6 pb-6 text-center -mt-16">
                 <div className="relative w-32 h-32 mx-auto mb-4 rounded-full p-1 bg-white shadow-md">
                    <div className="w-full h-full rounded-full bg-slate-100 flex items-center justify-center overflow-hidden">
@@ -166,7 +150,6 @@ export default function ProfilePage() {
             </div>
           </motion.div>
 
-          {/* --- Right Column: Details & Actions --- */}
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -174,7 +157,6 @@ export default function ProfilePage() {
             className="lg:col-span-2 space-y-6"
           >
             
-            {/* Personal Info Card */}
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
                <div className="flex items-center justify-between mb-6">
                  <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
@@ -213,7 +195,6 @@ export default function ProfilePage() {
                </div>
             </div>
 
-            {/* Stats Overview */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="bg-rose-50 rounded-2xl p-6 border border-rose-100 flex items-center justify-between group cursor-pointer hover:shadow-md transition-all">
                 <div>
@@ -240,7 +221,6 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Account Actions */}
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-4">Account Actions</h3>
                <div className="flex flex-col sm:flex-row gap-3">
