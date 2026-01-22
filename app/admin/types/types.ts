@@ -50,6 +50,23 @@ export interface FoundItem {
 }
 
 // Match types
+export interface LostUserConfirmation {
+  uniqueMarks?: string;
+  itemContents?: string;
+  distinguishingFeatures?: string;
+  personalIdentifiers?: string;
+  hiddenDetails?: string;
+  additionalNotes?: string;
+}
+
+export interface FoundUserConfirmation {
+  exactLocation?: string;
+  conditionWhenFound?: string;
+  visibleFeatures?: string;
+  accessoriesFound?: string;
+  additionalNotes?: string;
+}
+
 export interface Match {
   id: string;
   lostPost: {
@@ -81,7 +98,11 @@ export interface Match {
     }
   };
   matchScore: number;
-  status: 'matched' | 'pending' | 'pending_approval' | 'confirmed' | 'rejected';
+  status: 'matched' | 'pending' | 'pending_approval' | 'admin_review' | 'confirmed' | 'rejected';
+  lostUserConfirmation?: LostUserConfirmation;
+  foundUserConfirmation?: FoundUserConfirmation;
+  lostUserConfirmedAt?: string;
+  foundUserConfirmedAt?: string;
   createdAt: string;
 }
 
