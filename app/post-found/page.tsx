@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Camera, MapPin, Calendar, AlertCircle, X, Upload, Tag, MessageSquare, Phone, Package, CheckCircle, XCircle, Info, HelpCircle } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
+import MultiImageUpload from '@/components/ui/MultiImageUpload';
 
 // Toast Component
 const Toast = ({ message, type, onClose }: { message: string; type: 'success' | 'error'; onClose: () => void }) => {
@@ -60,7 +61,8 @@ const CategoryOptions = [
 export default function PostFoundPage() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [characterCount, setCharacterCount] = useState(0);
   
@@ -71,7 +73,6 @@ export default function PostFoundPage() {
     location: '',
     dateFound: '',
     contactInfo: '',
-    image: null as File | null,
     storageLocation: '',
   });
 
@@ -153,8 +154,10 @@ export default function PostFoundPage() {
       }
     }
     
-    if (formData.image && formData.image.size > 10 * 1024 * 1024) {
-      newErrors.image = 'Image size must be less than 10MB';
+    // Validate images
+    const totalSize = images.reduce((acc, img) => acc + img.size, 0);
+    if (totalSize > 50 * 1024 * 1024) {
+      newErrors.images = 'Total image size must be less than 50MB';
     }
     
     setErrors(newErrors);
@@ -169,10 +172,10 @@ export default function PostFoundPage() {
       location: '',
       dateFound: '',
       contactInfo: '',
-      image: null,
       storageLocation: '',
     });
-    setImagePreview(null);
+    setImages([]);
+    setImagePreviews([]);
     setCharacterCount(0);
     setErrors({});
   };
@@ -190,10 +193,17 @@ export default function PostFoundPage() {
     
     try {
       const formDataToSend = new FormData();
+      
+      // Add text fields
       Object.entries(formData).forEach(([key, value]) => {
         if (value !== null && value !== '') {
-          formDataToSend.append(key, value as any);
+          formDataToSend.append(key, value as string);
         }
+      });
+
+      // Add multiple images
+      images.forEach((image) => {
+        formDataToSend.append('images[]', image);
       });
 
       const response = await fetch('http://localhost/lost_and_found_backend/report/report_found.php', {
@@ -251,26 +261,12 @@ export default function PostFoundPage() {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setFormData({ ...formData, image: file });
-      
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-      
-      if (errors.image) {
-        setErrors({ ...errors, image: '' });
-      }
+  const handleImagesChange = (files: File[], previews: string[]) => {
+    setImages(files);
+    setImagePreviews(previews);
+    if (errors.images) {
+      setErrors({ ...errors, images: '' });
     }
-  };
-
-  const removeImage = () => {
-    setFormData({ ...formData, image: null });
-    setImagePreview(null);
   };
 
   const formatTitlePlaceholder = (category: string) => {
@@ -508,54 +504,16 @@ export default function PostFoundPage() {
                 {/* Image Upload */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Upload Photo (Recommended)
+                    Upload Photos (Recommended - up to 5 images)
                   </label>
                   
-                  {!imagePreview ? (
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg hover:border-emerald-400 transition-colors">
-                      <label className="cursor-pointer block">
-                        <div className="px-6 py-12 text-center">
-                          <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                          <div className="text-sm text-gray-600">
-                            <span className="font-semibold text-emerald-600 hover:text-emerald-500">
-                              Click to upload
-                            </span>
-                            {' '}or drag and drop
-                          </div>
-                          <p className="text-xs text-gray-500 mt-2">
-                            PNG, JPG, GIF up to 10MB
-                          </p>
-                        </div>
-                        <input
-                          type="file"
-                          className="sr-only"
-                          accept="image/*"
-                          onChange={handleFileChange}
-                        />
-                      </label>
-                    </div>
-                  ) : (
-                    <div className="relative rounded-lg overflow-hidden border border-gray-200">
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="w-full h-48 object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={removeImage}
-                        className="absolute top-3 right-3 bg-white text-gray-600 p-2 rounded-full hover:bg-gray-100 transition-colors shadow-sm"
-                      >
-                        <X size={18} />
-                      </button>
-                    </div>
-                  )}
-                  {errors.image && (
-                    <p className="mt-2 text-sm text-red-600 flex items-center">
-                      <AlertCircle size={14} className="mr-1" />
-                      {errors.image}
-                    </p>
-                  )}
+                  <MultiImageUpload
+                    images={images}
+                    previews={imagePreviews}
+                    onChange={handleImagesChange}
+                    maxImages={5}
+                    error={errors.images}
+                  />
                 </div>
 
                 {/* Contact Info */}
