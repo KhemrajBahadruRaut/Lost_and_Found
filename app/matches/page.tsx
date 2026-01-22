@@ -359,17 +359,22 @@ export default function Matches() {
                         <div className="flex items-center gap-2"><Calendar size={16} />{new Date(match.lostPost.date).toLocaleDateString()}</div>
                       </div>
 
-                      <div className="pt-3 border-t hidden">
-                        <p className="text-sm font-medium text-gray-700 mb-1">Contact Information:</p>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Mail size={14} /><a href={`mailto:${match.lostPost.user.email}`} className="hover:text-blue-600">{match.lostPost.user.email}</a>
-                        </div>
-                        {match.lostPost.user.phone && (
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Phone size={14} />{match.lostPost.user.phone}
+                      {/* Show contact info only when confirmed and user is the found item reporter */}
+                      {match.status === 'confirmed' && match.currentUserRole === 'found' && (
+                        <div className="pt-3 border-t bg-green-50 p-3 rounded-lg mt-3">
+                          <p className="text-sm font-medium text-green-700 mb-2">📞 Owner's Contact Information:</p>
+                          <div className="flex items-center gap-2 text-sm text-gray-700">
+                            <Mail size={14} className="text-green-600" />
+                            <a href={`mailto:${match.lostPost.user.email}`} className="hover:text-blue-600 font-medium">{match.lostPost.user.email}</a>
                           </div>
-                        )}
-                      </div>
+                          {match.lostPost.user.phone && (
+                            <div className="flex items-center gap-2 text-sm text-gray-700 mt-1">
+                              <Phone size={14} className="text-green-600" />
+                              <span className="font-medium">{match.lostPost.user.phone}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                     
 
@@ -386,17 +391,22 @@ export default function Matches() {
                         <div className="flex items-center gap-2"><Calendar size={16} />{new Date(match.foundPost.date).toLocaleDateString()}</div>
                       </div>
 
-                      <div className="pt-3 border-t hidden">
-                        <p className="text-sm font-medium text-gray-700 mb-1">Contact Information:</p>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Mail size={14} /><a href={`mailto:${match.foundPost.user.email}`} className="hover:text-blue-600">{match.foundPost.user.email}</a>
-                        </div>
-                        {match.foundPost.user.phone && (
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Phone size={14} />{match.foundPost.user.phone}
+                      {/* Show contact info only when confirmed and user is the lost item owner */}
+                      {match.status === 'confirmed' && match.currentUserRole === 'lost' && (
+                        <div className="pt-3 border-t bg-green-50 p-3 rounded-lg mt-3">
+                          <p className="text-sm font-medium text-green-700 mb-2">📞 Finder's Contact Information:</p>
+                          <div className="flex items-center gap-2 text-sm text-gray-700">
+                            <Mail size={14} className="text-green-600" />
+                            <a href={`mailto:${match.foundPost.user.email}`} className="hover:text-blue-600 font-medium">{match.foundPost.user.email}</a>
                           </div>
-                        )}
-                      </div>
+                          {match.foundPost.user.phone && (
+                            <div className="flex items-center gap-2 text-sm text-gray-700 mt-1">
+                              <Phone size={14} className="text-green-600" />
+                              <span className="font-medium">{match.foundPost.user.phone}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
 
