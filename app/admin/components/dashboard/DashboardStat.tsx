@@ -81,7 +81,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({
           </div>
           <div className="text-right">
             <p className="text-sm text-gray-500">Similarity Threshold</p>
-            <p className="text-lg font-bold text-blue-600">70% minimum</p>
+            <p className="text-lg font-bold text-blue-600">30% minimum</p>
           </div>
         </div>
       </div>

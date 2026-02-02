@@ -544,7 +544,7 @@ const handleLogin = async (e) => {
                       onChange={handleChange}
                       onBlur={handleBlur}
                       className={`w-full pl-10 pr-4 py-3 bg-gray-50 border ${errors.email && touched.email ? 'border-red-300 focus:ring-red-200' : 'border-gray-200 focus:ring-indigo-100 focus:border-indigo-500'} rounded-xl focus:ring-4 outline-none transition-all duration-200`}
-                      placeholder="john@example.com"
+                      placeholder="youremail@example.com"
                     />
                   </div>
                   {errors.email && touched.email && <p className="text-red-500 text-xs ml-1 flex items-center gap-1"><AlertCircle size={12}/>{errors.email}</p>}
