@@ -6,10 +6,12 @@ import {
   TrendingUp, Users, Clock, Zap, RefreshCw, 
   LayoutGrid, List, AlertCircle, CheckCircle2,
   ArrowRight, Box, Bell, Menu, X, User,
-  BarChart3
+  BarChart3, CheckCircle, XCircle, Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 // --- Interfaces (Matches your backend structure) ---
 interface Post {
@@ -37,7 +39,21 @@ interface DashboardStats {
   activeUsers: number;
 }
 
+interface Notification {
+  id: number;
+  type: string;
+  title: string;
+  message: string;
+  is_read: boolean;
+  related_type: string | null;
+  related_id: string | null;
+  link: string | null;
+  created_at: string;
+}
+
 export default function DashboardPage() {
+  const router = useRouter();
+  
   // --- State ---
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,6 +63,7 @@ export default function DashboardPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeNav, setActiveNav] = useState('dashboard');
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const [stats, setStats] = useState<DashboardStats>({
     totalPosts: 0,
@@ -60,6 +77,7 @@ export default function DashboardPage() {
   // --- Effects ---
   useEffect(() => {
     fetchDashboardData();
+    fetchNotifications();
     const interval = setInterval(() => {
       fetchPosts();
     }, 30000); 
@@ -119,6 +137,76 @@ export default function DashboardPage() {
       recoveryRate: totalPosts ? Math.round((foundItems / totalPosts) * 100) : 0,
       activeUsers: new Set(posts.map(p => p.user.email)).size
     };
+  };
+
+  // --- Notifications Logic ---
+  const fetchNotifications = async () => {
+    try {
+      const response = await fetch(
+        'http://localhost/lost_and_found_backend/user/notifications/get_notifications.php',
+        { credentials: 'include' }
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setNotifications(data.notifications || []);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  };
+
+  const markAsRead = async (notificationId: number) => {
+    try {
+      await fetch(
+        'http://localhost/lost_and_found_backend/user/notifications/mark_read.php',
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ notificationId }),
+        }
+      );
+      setNotifications(prev => 
+        prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
+      );
+    } catch (error) {
+      console.error('Error marking as read:', error);
+    }
+  };
+
+  const handleNotificationClick = (notification: Notification) => {
+    if (!notification.is_read) {
+      markAsRead(notification.id);
+    }
+    if (notification.link) {
+      router.push(notification.link);
+    }
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+    return date.toLocaleDateString();
+  };
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'match_confirmed':
+        return <CheckCircle size={16} className="text-green-500" />;
+      case 'match_rejected':
+        return <XCircle size={16} className="text-red-500" />;
+      default:
+        return <Bell size={16} className="text-blue-500" />;
+    }
   };
 
   // --- Filtering ---
@@ -207,6 +295,66 @@ export default function DashboardPage() {
             </motion.div>
           ))}
         </div>
+
+        {/* Recent Notifications Section */}
+        {notifications.length > 0 && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mb-8"
+          >
+            <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <Bell size={18} className="text-blue-600" />
+                  <h2 className="font-bold text-slate-900">Recent Notifications</h2>
+                  {notifications.filter(n => !n.is_read).length > 0 && (
+                    <span className="px-2 py-0.5 bg-rose-100 text-rose-600 text-xs font-bold rounded-full">
+                      {notifications.filter(n => !n.is_read).length} new
+                    </span>
+                  )}
+                </div>
+                <Link 
+                  href="/matches" 
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+                >
+                  View all <ArrowRight size={14} />
+                </Link>
+              </div>
+              
+              <div className="divide-y divide-slate-50">
+                {notifications.slice(0, 5).map((notification) => (
+                  <div
+                    key={notification.id}
+                    onClick={() => handleNotificationClick(notification)}
+                    className={`flex items-start gap-3 px-5 py-4 cursor-pointer hover:bg-slate-50 transition-colors ${
+                      !notification.is_read ? 'bg-blue-50/30' : ''
+                    }`}
+                  >
+                    <div className="mt-0.5 p-2 rounded-lg bg-slate-100">
+                      {getNotificationIcon(notification.type)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm ${!notification.is_read ? 'font-semibold text-slate-900' : 'text-slate-700'}`}>
+                        {notification.title}
+                      </p>
+                      <p className="text-sm text-slate-500 mt-0.5 line-clamp-1">
+                        {notification.message}
+                      </p>
+                      <p className="text-xs text-slate-400 mt-1">
+                        {formatTimeAgo(notification.created_at)}
+                      </p>
+                    </div>
+                    {!notification.is_read && (
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* Controls Toolbar */}
         <div className="sticky top-20 z-30 bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-xl p-2 shadow-sm mb-6 flex flex-col md:flex-row gap-3">
