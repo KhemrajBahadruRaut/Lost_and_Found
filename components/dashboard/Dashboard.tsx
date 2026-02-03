@@ -444,7 +444,7 @@ export default function DashboardPage() {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  key={post.id}
+                  key={`${post.type}-${post.id}`}
                   className={`group bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-slate-200/50 hover:border-blue-200 transition-all duration-300 ${
                     viewMode === 'list' ? 'flex flex-row items-center h-40' : 'flex flex-col'
                   }`}
