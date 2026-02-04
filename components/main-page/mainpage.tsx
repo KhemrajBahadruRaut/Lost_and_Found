@@ -59,13 +59,13 @@ export default function MainPage() {
     {
       step: "01",
       title: "Data Ingestion",
-      desc: "User submits a structured report (Lost or Found) into the SQL database.",
+      desc: "User submits a structured report (Lost or Found) into form of the website.",
       icon: <Database size={20} />,
     },
     {
       step: "02",
       title: "Algorithmic Processing",
-      desc: "System runs a query to identify overlapping parameters (Title, Category, Loc).",
+      desc: "System runs a query to identify overlapping parameters (Title, Description, Category, Loc).",
       icon: <Activity size={20} />,
     },
     {
@@ -104,17 +104,11 @@ export default function MainPage() {
       >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-slate-900 rounded flex items-center justify-center text-white">
-              <Terminal size={18} />
+            <div className="w-40  h-8 flex items-center justify-center text-white">
+              {/* <Terminal size={18} /> */}
+              <img src="/logo.png" alt="" className="mix-blend-mode"/>
             </div>
-            <div className="flex flex-col">
-              <span className="text-lg font-bold tracking-tight text-slate-900 leading-none">
-                FynDR
-              </span>
-              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">
-                System V1.0
-              </span>
-            </div>
+          
           </div>
 
           <div className="hidden md:flex items-center space-x-8 text-sm font-medium font-mono text-slate-600">
@@ -447,67 +441,7 @@ export default function MainPage() {
       </section>
 
       {/* --- Security Architecture --- */}
-      <section
-        id="security"
-        className="py-24 bg-slate-900 text-white relative overflow-hidden"
-      >
-        {/* Abstract shapes */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[100px]" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-emerald-600/10 rounded-full blur-[100px]" />
-
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="mb-16">
-            <h2 className="text-3xl font-bold mb-4">Security Protocols</h2>
-            <p className="text-slate-400 max-w-2xl">
-              We enforce strict data privacy and identity verification measures.
-              Contact details are masked until a preliminary match is confirmed
-              by the system.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Security Card 1 */}
-            <div className="bg-slate-800/50 border border-slate-700 p-8 rounded hover:bg-slate-800 transition-colors">
-              <div className="w-12 h-12 bg-emerald-500/10 rounded flex items-center justify-center text-emerald-500 mb-6 border border-emerald-500/20">
-                <Lock size={24} />
-              </div>
-              <h3 className="text-xl font-bold mb-3">RBAC System</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">
-                Role-Based Access Control limits sensitive database operations
-                to authorized administrators only. Students have read/write
-                access only to their own reports.
-              </p>
-            </div>
-
-            {/* Security Card 2 */}
-            <div className="bg-slate-800/50 border border-slate-700 p-8 rounded hover:bg-slate-800 transition-colors">
-              <div className="w-12 h-12 bg-blue-500/10 rounded flex items-center justify-center text-blue-500 mb-6 border border-blue-500/20">
-                <EyeOff size={24} />
-              </div>
-              <h3 className="text-xl font-bold mb-3">Data Masking</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">
-                Personally Identifiable Information (PII) such as phone numbers
-                and email addresses are hidden from public search results to
-                prevent scraping.
-              </p>
-            </div>
-
-            {/* Security Card 3 */}
-            <div className="bg-slate-800/50 border border-slate-700 p-8 rounded hover:bg-slate-800 transition-colors">
-              <div className="w-12 h-12 bg-purple-500/10 rounded flex items-center justify-center text-purple-500 mb-6 border border-purple-500/20">
-                <FileKey size={24} />
-              </div>
-              <h3 className="text-xl font-bold mb-3">Audit Trails</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">
-                Every claim and status update creates an immutable log entry.
-                This ensures accountability during the physical handover of
-                assets.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
+    
       {/* --- Footer --- */}
       <footer className="bg-slate-50 pt-16 pb-8 border-t border-slate-200 text-slate-600 text-sm">
         <div className="max-w-7xl mx-auto px-6">

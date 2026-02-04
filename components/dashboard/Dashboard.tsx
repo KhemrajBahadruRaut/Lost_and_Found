@@ -253,10 +253,10 @@ export default function DashboardPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         
         {/* Header Area */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-3">
           <div>
             <h1 className="text-3xl font-bold text-slate-900">Overview</h1>
-            <p className="text-slate-500 mt-1">Real-time insights on lost and found items across campus.</p>
+            <p className="text-slate-500 mt-1">Real-time insights on lost and found items.</p>
           </div>
           <button 
             onClick={fetchPosts}
@@ -266,46 +266,46 @@ export default function DashboardPage() {
             {isRefreshing ? 'Updating...' : 'Refresh Data'}
           </button>
         </div>
+<div className='flex gap-5 mb-3'>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-1">
           {[
             { label: 'Total Items', val: stats.totalPosts, icon: Box, color: 'text-blue-600', bg: 'bg-blue-50' },
             { label: 'Lost Active', val: stats.lostItems, icon: AlertCircle, color: 'text-rose-600', bg: 'bg-rose-50' },
             { label: 'Found Items', val: stats.foundItems, icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-            { label: 'Active Users', val: stats.activeUsers, icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' }
+            // { label: 'Active Users', val: stats.activeUsers, icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' }
           ].map((item, i) => (
             <motion.div 
               key={i}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="bg-white p-5 rounded-xl border border-slate-200/60 shadow-sm hover:shadow-md transition-shadow"
+              className="bg-white px-5 py-2 rounded-xl border border-slate-200/60 shadow-sm hover:shadow-md transition-shadow"
             >
-              <div className="flex items-center justify-between mb-4">
-                <div className={`p-2 rounded-lg ${item.bg} ${item.color}`}>
+              <div className="flex items-center justify-center mb-4">
+                <div className={`p-2 rounded-lg  ${item.bg} ${item.color}`}>
                   <item.icon size={20} />
                 </div>
-                {i === 0 && <span className="text-xs font-bold text-slate-500">{stats.recoveryRate}% Recovery</span>}
+                {i === 0 && <span className="text-xs pl-8 font-bold text-slate-500">{stats.recoveryRate}% Recovery</span>}
               </div>
-              <p className="text-slate-500 text-sm font-medium">{item.label}</p>
-              <h3 className="text-2xl font-bold text-slate-900 mt-1">
-                {loading ? <div className="h-8 w-16 bg-slate-100 animate-pulse rounded" /> : item.val}
+              <p className="text-slate-500 flex justify-center text-sm font-medium">{item.label}</p>
+              <h3 className="text-2xl font-bold flex justify-center text-slate-900 mt-1">
+                {loading ? <div className="h-8 w-16  bg-slate-100 animate-pulse rounded" /> : item.val}
               </h3>
             </motion.div>
           ))}
         </div>
-
         {/* Recent Notifications Section */}
         {notifications.length > 0 && (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="mb-8"
+            className="mb-1"
           >
             <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
-              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+              <div className="flex items-center justify-between px-5 py-2 border-b border-slate-100">
                 <div className="flex items-center gap-2">
                   <Bell size={18} className="text-blue-600" />
                   <h2 className="font-bold text-slate-900">Recent Notifications</h2>
@@ -355,6 +355,8 @@ export default function DashboardPage() {
             </div>
           </motion.div>
         )}
+</div>
+
 
         {/* Controls Toolbar */}
         <div className="sticky top-20 z-30 bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-xl p-2 shadow-sm mb-6 flex flex-col md:flex-row gap-3">
@@ -512,7 +514,7 @@ export default function DashboardPage() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-xs font-bold shadow-sm">
+                        <div className="w-7 h-7 rounded-full bg-linear-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-xs font-bold shadow-sm">
                           {post.user.name.charAt(0)}
                         </div>
                       </div>

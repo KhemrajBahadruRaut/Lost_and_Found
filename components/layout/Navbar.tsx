@@ -255,12 +255,13 @@ export default function Navbar() {
           
           {/* 1. Logo */}
           <Link href="/dashboard" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white shadow-lg shadow-slate-900/20 group-hover:scale-105 transition-transform">
-               <Box size={20} strokeWidth={2.5} />
+            <div className="w-30 h-8 group-hover:scale-105 transition-transform">
+               {/* <Box size={20} strokeWidth={2.5} /> */}
+               <img src="/logo.png" alt="" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-slate-900">
+            {/* <span className="text-xl font-bold tracking-tight text-slate-900">
               FynDR
-            </span>
+            </span> */}
           </Link>
 
           {/* 2. Desktop Navigation (Centered Pill) */}
@@ -455,7 +456,7 @@ export default function Navbar() {
                >
                  <Bell size={20} />
                  {unreadCount > 0 && (
-                   <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center ring-2 ring-white">
+                   <span className="absolute -top-1 -right-1 min-w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center ring-2 ring-white">
                      {unreadCount > 9 ? '9+' : unreadCount}
                    </span>
                  )}
