@@ -72,11 +72,27 @@ export default function Matches() {
 
       const data: Match[] = await response.json();
       setMatches(data);
+      
+      // Mark matches as viewed and notify navbar to clear badge
+      await markMatchesAsViewed();
     } catch (err) {
       console.error(err);
       setError('An unexpected error occurred.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const markMatchesAsViewed = async () => {
+    try {
+      await fetch('http://localhost/lost_and_found_backend/matches/mark_matches_viewed.php', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      // Dispatch event to notify Navbar to clear the badge
+      window.dispatchEvent(new CustomEvent('matchesViewed'));
+    } catch (err) {
+      console.error('Error marking matches as viewed:', err);
     }
   };
 

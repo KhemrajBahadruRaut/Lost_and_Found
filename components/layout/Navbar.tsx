@@ -36,6 +36,7 @@ export default function Navbar() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
+  const [unviewedMatchCount, setUnviewedMatchCount] = useState(0);
   
   const profileRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
@@ -58,6 +59,25 @@ export default function Navbar() {
       }
     } catch (error) {
       console.error('Error fetching notifications:', error);
+    }
+  }, []);
+
+  // --- Fetch Unviewed Match Count ---
+  const fetchUnviewedMatches = useCallback(async () => {
+    try {
+      const response = await fetch(
+        'http://localhost/lost_and_found_backend/matches/get_unviewed_matches.php',
+        { credentials: 'include' }
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setUnviewedMatchCount(data.unviewedCount || 0);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching unviewed matches:', error);
     }
   }, []);
 
@@ -163,11 +183,17 @@ export default function Navbar() {
 
     loadUser();
     fetchNotifications();
+    fetchUnviewedMatches();
 
     window.addEventListener('userUpdated', loadUser);
     
-    // Poll notifications every 30 seconds
+    // Listen for matches viewed event
+    const handleMatchesViewed = () => setUnviewedMatchCount(0);
+    window.addEventListener('matchesViewed', handleMatchesViewed);
+    
+    // Poll notifications and matches every 30 seconds
     const notifInterval = setInterval(fetchNotifications, 30000);
+    const matchInterval = setInterval(fetchUnviewedMatches, 30000);
     
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
@@ -184,11 +210,13 @@ export default function Navbar() {
     
     return () => {
       window.removeEventListener('userUpdated', loadUser);
+      window.removeEventListener('matchesViewed', handleMatchesViewed);
       window.removeEventListener("scroll", handleScroll);
       document.removeEventListener("mousedown", handleClickOutside);
       clearInterval(notifInterval);
+      clearInterval(matchInterval);
     };
-  }, [fetchNotifications]);
+  }, [fetchNotifications, fetchUnviewedMatches]);
 
   // --- Handlers ---
   const handleLogout = async () => {
@@ -285,6 +313,12 @@ export default function Navbar() {
                   )}
                   <span className="relative z-10 flex items-center gap-1.5">
                     {link.name}
+                    {/* Match notification badge */}
+                    {link.name === 'Matches' && unviewedMatchCount > 0 && (
+                      <span className="min-w-[18px] h-[18px] bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                        {unviewedMatchCount > 9 ? '9+' : unviewedMatchCount}
+                      </span>
+                    )}
                   </span>
                 </Link>
               );
@@ -546,19 +580,27 @@ export default function Navbar() {
 
                {/* Mobile Links */}
                {navLinks.map(link => (
-                  <Link 
-                    key={link.href} 
-                    href={link.href}
-                    onClick={() => setMenuOpen(false)}
-                    className={`flex items-center px-3 py-3 rounded-xl text-sm font-medium ${
-                      pathname === link.href 
-                        ? 'bg-blue-50 text-blue-700' 
-                        : 'text-slate-600 hover:bg-slate-50'
-                    }`}
-                  >
-                    <link.icon size={18} className="mr-3 opacity-70" />
-                    {link.name}
-                  </Link>
+                   <Link 
+                     key={link.href} 
+                     href={link.href}
+                     onClick={() => setMenuOpen(false)}
+                     className={`flex items-center justify-between px-3 py-3 rounded-xl text-sm font-medium ${
+                       pathname === link.href 
+                         ? 'bg-blue-50 text-blue-700' 
+                         : 'text-slate-600 hover:bg-slate-50'
+                     }`}
+                   >
+                     <span className="flex items-center">
+                       <link.icon size={18} className="mr-3 opacity-70" />
+                       {link.name}
+                     </span>
+                     {/* Mobile match notification badge */}
+                     {link.name === 'Matches' && unviewedMatchCount > 0 && (
+                       <span className="min-w-[20px] h-[20px] bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                         {unviewedMatchCount > 9 ? '9+' : unviewedMatchCount}
+                       </span>
+                     )}
+                   </Link>
                ))}
 
                {/* Mobile Actions */}
