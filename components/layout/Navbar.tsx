@@ -2,16 +2,11 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { 
-  LogOut, Menu, Bell, User, Settings, ChevronDown, 
-  Box, Search, PlusCircle, LayoutGrid, List, Zap, X,
-  CheckCheck, Trash2, CheckCircle, XCircle
-} from 'lucide-react';
+import { LogOut, Menu, Bell, User, Settings, ChevronDown, Search, PlusCircle, LayoutGrid, List, Zap, X, CheckCheck, Trash2, CheckCircle, XCircle} from 'lucide-react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 
-// Notification interface
 interface Notification {
   id: number;
   type: string;
@@ -28,7 +23,6 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   
-  // --- State ---
   const [user, setUser] = useState<any>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -41,8 +35,6 @@ export default function Navbar() {
   const profileRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
   const [scrolled, setScrolled] = useState(false);
-
-  // --- Fetch Notifications ---
   const fetchNotifications = useCallback(async () => {
     try {
       const response = await fetch(
@@ -61,8 +53,6 @@ export default function Navbar() {
       console.error('Error fetching notifications:', error);
     }
   }, []);
-
-  // --- Fetch Unviewed Match Count ---
   const fetchUnviewedMatches = useCallback(async () => {
     try {
       const response = await fetch(
@@ -596,7 +586,7 @@ export default function Navbar() {
                      </span>
                      {/* Mobile match notification badge */}
                      {link.name === 'Matches' && unviewedMatchCount > 0 && (
-                       <span className="min-w-[20px] h-[20px] bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                       <span className="min-w-5 h-5 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                          {unviewedMatchCount > 9 ? '9+' : unviewedMatchCount}
                        </span>
                      )}
