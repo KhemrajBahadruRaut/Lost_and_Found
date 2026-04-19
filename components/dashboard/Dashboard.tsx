@@ -1,22 +1,29 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { 
-  Search, Filter, MapPin, Eye, MessageSquare, 
-  TrendingUp, Users, Clock, Zap, RefreshCw, 
-  LayoutGrid, List, AlertCircle, CheckCircle2,
-  ArrowRight, Box, Bell, Menu, X, User,
-  BarChart3, CheckCircle, XCircle, Trash2
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
+import { useEffect, useState } from "react";
+import {
+  Search,
+  MapPin,
+  Clock,
+  Zap,
+  RefreshCw,
+  LayoutGrid,
+  List,
+  AlertCircle,
+  CheckCircle2,
+  ArrowRight,
+  Box,
+  Bell,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-// --- Interfaces (Matches your backend structure) ---
 interface Post {
   id: string;
-  type: 'lost' | 'found';
+  type: "lost" | "found";
   title: string;
   description: string;
   location: string;
@@ -26,7 +33,7 @@ interface Post {
     name: string;
     email: string;
   };
-  status: 'active' | 'resolved' | 'pending';
+  status: "active" | "resolved" | "pending";
   matchScore?: number;
 }
 
@@ -53,16 +60,16 @@ interface Notification {
 
 export default function DashboardPage() {
   const router = useRouter();
-  
+
   // --- State ---
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState<'all' | 'lost' | 'found'>('all');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filter, setFilter] = useState<"all" | "lost" | "found">("all");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeNav, setActiveNav] = useState('dashboard');
+  const [activeNav, setActiveNav] = useState("dashboard");
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const [stats, setStats] = useState<DashboardStats>({
@@ -71,7 +78,7 @@ export default function DashboardPage() {
     foundItems: 0,
     matchesMade: 0,
     recoveryRate: 0,
-    activeUsers: 0
+    activeUsers: 0,
   });
 
   // --- Effects ---
@@ -80,7 +87,7 @@ export default function DashboardPage() {
     fetchNotifications();
     const interval = setInterval(() => {
       fetchPosts();
-    }, 30000); 
+    }, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -88,17 +95,17 @@ export default function DashboardPage() {
   const fetchDashboardData = async () => {
     try {
       const response = await fetch(
-        'http://localhost/lost_and_found_backend/posts/get_posts.php',
-        { method: 'GET', credentials: 'include' }
+        "http://localhost/lost_and_found_backend/posts/get_posts.php",
+        { method: "GET", credentials: "include" },
       );
 
-      if (!response.ok) throw new Error('Failed to fetch posts');
+      if (!response.ok) throw new Error("Failed to fetch posts");
 
       const postsData: Post[] = await response.json();
       setPosts(postsData);
       setStats(calculateStatsFromPosts(postsData));
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      console.error("Error fetching dashboard data:", error);
     } finally {
       setLoading(false);
     }
@@ -108,8 +115,8 @@ export default function DashboardPage() {
     setIsRefreshing(true);
     try {
       const response = await fetch(
-        'http://localhost/lost_and_found_backend/posts/get_posts.php',
-        { method: 'GET', credentials: 'include' }
+        "http://localhost/lost_and_found_backend/posts/get_posts.php",
+        { method: "GET", credentials: "include" },
       );
 
       if (response.ok) {
@@ -118,7 +125,7 @@ export default function DashboardPage() {
         setStats(calculateStatsFromPosts(data));
       }
     } catch (error) {
-      console.error('Error refreshing posts:', error);
+      console.error("Error refreshing posts:", error);
     } finally {
       setTimeout(() => setIsRefreshing(false), 800);
     }
@@ -126,16 +133,18 @@ export default function DashboardPage() {
 
   const calculateStatsFromPosts = (posts: Post[]) => {
     const totalPosts = posts.length;
-    const lostItems = posts.filter(p => p.type === 'lost').length;
-    const foundItems = posts.filter(p => p.type === 'found').length;
+    const lostItems = posts.filter((p) => p.type === "lost").length;
+    const foundItems = posts.filter((p) => p.type === "found").length;
 
     return {
       totalPosts,
       lostItems,
       foundItems,
       matchesMade: 0, // Update later from matches API
-      recoveryRate: totalPosts ? Math.round((foundItems / totalPosts) * 100) : 0,
-      activeUsers: new Set(posts.map(p => p.user.email)).size
+      recoveryRate: totalPosts
+        ? Math.round((foundItems / totalPosts) * 100)
+        : 0,
+      activeUsers: new Set(posts.map((p) => p.user.email)).size,
     };
   };
 
@@ -143,10 +152,10 @@ export default function DashboardPage() {
   const fetchNotifications = async () => {
     try {
       const response = await fetch(
-        'http://localhost/lost_and_found_backend/user/notifications/get_notifications.php',
-        { credentials: 'include' }
+        "http://localhost/lost_and_found_backend/user/notifications/get_notifications.php",
+        { credentials: "include" },
       );
-      
+
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
@@ -154,26 +163,28 @@ export default function DashboardPage() {
         }
       }
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      console.error("Error fetching notifications:", error);
     }
   };
 
   const markAsRead = async (notificationId: number) => {
     try {
       await fetch(
-        'http://localhost/lost_and_found_backend/user/notifications/mark_read.php',
+        "http://localhost/lost_and_found_backend/user/notifications/mark_read.php",
         {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ notificationId }),
-        }
+        },
       );
-      setNotifications(prev => 
-        prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n.id === notificationId ? { ...n, is_read: true } : n,
+        ),
       );
     } catch (error) {
-      console.error('Error marking as read:', error);
+      console.error("Error marking as read:", error);
     }
   };
 
@@ -190,19 +201,21 @@ export default function DashboardPage() {
     const date = new Date(dateString);
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-    
-    if (diffInSeconds < 60) return 'Just now';
+
+    if (diffInSeconds < 60) return "Just now";
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+    if (diffInSeconds < 86400)
+      return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    if (diffInSeconds < 604800)
+      return `${Math.floor(diffInSeconds / 86400)}d ago`;
     return date.toLocaleDateString();
   };
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'match_confirmed':
+      case "match_confirmed":
         return <CheckCircle size={16} className="text-green-500" />;
-      case 'match_rejected':
+      case "match_rejected":
         return <XCircle size={16} className="text-red-500" />;
       default:
         return <Bell size={16} className="text-blue-500" />;
@@ -210,14 +223,14 @@ export default function DashboardPage() {
   };
 
   // --- Filtering ---
-  const filteredPosts = posts.filter(post => {
+  const filteredPosts = posts.filter((post) => {
     const matchesSearch =
-      searchTerm === '' ||
+      searchTerm === "" ||
       post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       post.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       post.location.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesFilter = filter === 'all' || post.type === filter;
+    const matchesFilter = filter === "all" || post.type === filter;
 
     return matchesSearch && matchesFilter;
   });
@@ -227,7 +240,9 @@ export default function DashboardPage() {
     <button
       onClick={() => setActiveNav(id)}
       className={`relative px-4 py-2 text-sm font-medium transition-colors ${
-        activeNav === id ? 'text-blue-600' : 'text-slate-500 hover:text-slate-700'
+        activeNav === id
+          ? "text-blue-600"
+          : "text-slate-500 hover:text-slate-700"
       }`}
     >
       {activeNav === id && (
@@ -245,128 +260,162 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-slate-50/50 font-sans text-slate-900 selection:bg-blue-100 pb-20">
-      
       {/* --- Premium Glass Navbar --- */}
-      
 
       {/* --- Main Content --- */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        
         {/* Header Area */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-3">
           <div>
             <h1 className="text-3xl font-bold text-slate-900">Overview</h1>
-            <p className="text-slate-500 mt-1">Real-time insights on lost and found items.</p>
+            <p className="text-slate-500 mt-1">
+              Real-time insights on lost and found items.
+            </p>
           </div>
-          <button 
+          <button
             onClick={fetchPosts}
-            className={`flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm ${isRefreshing ? 'animate-pulse' : ''}`}
+            className={`flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm ${isRefreshing ? "animate-pulse" : ""}`}
           >
-            <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
-            {isRefreshing ? 'Updating...' : 'Refresh Data'}
+            <RefreshCw
+              size={16}
+              className={isRefreshing ? "animate-spin" : ""}
+            />
+            {isRefreshing ? "Updating..." : "Refresh Data"}
           </button>
         </div>
-<div className='flex gap-5 mb-3'>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-1">
-          {[
-            { label: 'Total Items', val: stats.totalPosts, icon: Box, color: 'text-blue-600', bg: 'bg-blue-50' },
-            { label: 'Lost Active', val: stats.lostItems, icon: AlertCircle, color: 'text-rose-600', bg: 'bg-rose-50' },
-            { label: 'Found Items', val: stats.foundItems, icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-            // { label: 'Active Users', val: stats.activeUsers, icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' }
-          ].map((item, i) => (
-            <motion.div 
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              className="bg-white px-5 py-2 rounded-xl border border-slate-200/60 shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center justify-center mb-4">
-                <div className={`p-2 rounded-lg  ${item.bg} ${item.color}`}>
-                  <item.icon size={20} />
-                </div>
-                {i === 0 && <span className="text-xs pl-8 font-bold text-slate-500">{stats.recoveryRate}% Recovery</span>}
-              </div>
-              <p className="text-slate-500 flex justify-center text-sm font-medium">{item.label}</p>
-              <h3 className="text-2xl font-bold flex justify-center text-slate-900 mt-1">
-                {loading ? <div className="h-8 w-16  bg-slate-100 animate-pulse rounded" /> : item.val}
-              </h3>
-            </motion.div>
-          ))}
-        </div>
-        {/* Recent Notifications Section */}
-        {notifications.length > 0 && (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="mb-1"
-          >
-            <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
-              <div className="flex items-center justify-between px-5 py-2 border-b border-slate-100">
-                <div className="flex items-center gap-2">
-                  <Bell size={18} className="text-blue-600" />
-                  <h2 className="font-bold text-slate-900">Recent Notifications</h2>
-                  {notifications.filter(n => !n.is_read).length > 0 && (
-                    <span className="px-2 py-0.5 bg-rose-100 text-rose-600 text-xs font-bold rounded-full">
-                      {notifications.filter(n => !n.is_read).length} new
+        <div className="flex gap-5 mb-3">
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-1">
+            {[
+              {
+                label: "Total Items",
+                val: stats.totalPosts,
+                icon: Box,
+                color: "text-blue-600",
+                bg: "bg-blue-50",
+              },
+              {
+                label: "Lost Active",
+                val: stats.lostItems,
+                icon: AlertCircle,
+                color: "text-rose-600",
+                bg: "bg-rose-50",
+              },
+              {
+                label: "Found Items",
+                val: stats.foundItems,
+                icon: CheckCircle2,
+                color: "text-emerald-600",
+                bg: "bg-emerald-50",
+              },
+              // { label: 'Active Users', val: stats.activeUsers, icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' }
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className="bg-white px-5 py-2 rounded-xl border border-slate-200/60 shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-center justify-center mb-4">
+                  <div className={`p-2 rounded-lg  ${item.bg} ${item.color}`}>
+                    <item.icon size={20} />
+                  </div>
+                  {i === 0 && (
+                    <span className="text-xs pl-8 font-bold text-slate-500">
+                      {stats.recoveryRate}% Recovery
                     </span>
                   )}
                 </div>
-                <Link 
-                  href="/matches" 
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
-                >
-                  View all <ArrowRight size={14} />
-                </Link>
-              </div>
-              
-              <div className="divide-y divide-slate-50">
-                {notifications.slice(0, 5).map((notification) => (
-                  <div
-                    key={notification.id}
-                    onClick={() => handleNotificationClick(notification)}
-                    className={`flex items-start gap-3 px-5 py-4 cursor-pointer hover:bg-slate-50 transition-colors ${
-                      !notification.is_read ? 'bg-blue-50/30' : ''
-                    }`}
-                  >
-                    <div className="mt-0.5 p-2 rounded-lg bg-slate-100">
-                      {getNotificationIcon(notification.type)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm ${!notification.is_read ? 'font-semibold text-slate-900' : 'text-slate-700'}`}>
-                        {notification.title}
-                      </p>
-                      <p className="text-sm text-slate-500 mt-0.5 line-clamp-1">
-                        {notification.message}
-                      </p>
-                      <p className="text-xs text-slate-400 mt-1">
-                        {formatTimeAgo(notification.created_at)}
-                      </p>
-                    </div>
-                    {!notification.is_read && (
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2" />
+                <p className="text-slate-500 flex justify-center text-sm font-medium">
+                  {item.label}
+                </p>
+                <h3 className="text-2xl font-bold flex justify-center text-slate-900 mt-1">
+                  {loading ? (
+                    <div className="h-8 w-16  bg-slate-100 animate-pulse rounded" />
+                  ) : (
+                    item.val
+                  )}
+                </h3>
+              </motion.div>
+            ))}
+          </div>
+          {/* Recent Notifications Section */}
+          {notifications.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="mb-1"
+            >
+              <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
+                <div className="flex items-center justify-between px-5 py-2 border-b border-slate-100">
+                  <div className="flex items-center gap-2">
+                    <Bell size={18} className="text-blue-600" />
+                    <h2 className="font-bold text-slate-900">
+                      Recent Notification
+                    </h2>
+                    {notifications.filter((n) => !n.is_read).length > 0 && (
+                      <span className="px-2 py-0.5 bg-rose-100 text-rose-600 text-xs font-bold rounded-full">
+                        {notifications.filter((n) => !n.is_read).length} new
+                      </span>
                     )}
                   </div>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        )}
-</div>
+                  <Link
+                    href="/matches"
+                    className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+                  >
+                    View all <ArrowRight size={14} />
+                  </Link>
+                </div>
 
+                <div className="divide-y divide-slate-50">
+                  {notifications.slice(0, 1).map((notification) => (
+                    <div
+                      key={notification.id}
+                      onClick={() => handleNotificationClick(notification)}
+                      className={`flex items-start gap-3 px-5 py-4 cursor-pointer hover:bg-slate-50 transition-colors ${
+                        !notification.is_read ? "bg-blue-50/30" : ""
+                      }`}
+                    >
+                      <div className="mt-0.5 p-2 rounded-lg bg-slate-100">
+                        {getNotificationIcon(notification.type)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className={`text-sm ${!notification.is_read ? "font-semibold text-slate-900" : "text-slate-700"}`}
+                        >
+                          {notification.title}
+                        </p>
+                        <p className="text-sm text-slate-500 mt-0.5 line-clamp-1">
+                          {notification.message}
+                        </p>
+                        <p className="text-xs text-slate-400 mt-1">
+                          {formatTimeAgo(notification.created_at)}
+                        </p>
+                      </div>
+                      {!notification.is_read && (
+                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </div>
 
         {/* Controls Toolbar */}
         <div className="sticky top-20 z-30 bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-xl p-2 shadow-sm mb-6 flex flex-col md:flex-row gap-3">
-          
           {/* Search Input */}
           <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input 
-              type="text" 
-              placeholder="Search items by title, description, or location..." 
+            <Search
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+              size={18}
+            />
+            <input
+              type="text"
+              placeholder="Search items by title, description, or location..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-transparent focus:bg-white border focus:border-blue-500 rounded-lg text-sm transition-all outline-none placeholder:text-slate-400"
@@ -376,14 +425,14 @@ export default function DashboardPage() {
           <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-hide">
             {/* Filter Pills */}
             <div className="flex bg-slate-100 p-1 rounded-lg shrink-0">
-              {['all', 'lost', 'found'].map((type) => (
+              {["all", "lost", "found"].map((type) => (
                 <button
                   key={type}
                   onClick={() => setFilter(type as any)}
                   className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-md transition-all ${
-                    filter === type 
-                    ? 'bg-white text-slate-900 shadow-sm' 
-                    : 'text-slate-500 hover:text-slate-700'
+                    filter === type
+                      ? "bg-white text-slate-900 shadow-sm"
+                      : "text-slate-500 hover:text-slate-700"
                   }`}
                 >
                   {type}
@@ -394,15 +443,15 @@ export default function DashboardPage() {
             <div className="w-px h-8 bg-slate-200 mx-1 hidden md:block" />
 
             {/* View Toggles */}
-            <button 
-              onClick={() => setViewMode('grid')} 
-              className={`p-2.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-slate-100 text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}
+            <button
+              onClick={() => setViewMode("grid")}
+              className={`p-2.5 rounded-lg transition-colors ${viewMode === "grid" ? "bg-slate-100 text-slate-900" : "text-slate-400 hover:text-slate-600"}`}
             >
               <LayoutGrid size={18} />
             </button>
-            <button 
-              onClick={() => setViewMode('list')} 
-              className={`p-2.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-slate-100 text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}
+            <button
+              onClick={() => setViewMode("list")}
+              className={`p-2.5 rounded-lg transition-colors ${viewMode === "list" ? "bg-slate-100 text-slate-900" : "text-slate-400 hover:text-slate-600"}`}
             >
               <List size={18} />
             </button>
@@ -411,34 +460,50 @@ export default function DashboardPage() {
 
         {/* Content Area */}
         {loading ? (
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-             {[1,2,3,4,5,6].map(n => (
-               <div key={n} className="bg-white rounded-2xl p-4 border border-slate-200 space-y-4">
-                 <div className="h-48 bg-slate-100 rounded-xl animate-pulse" />
-                 <div className="h-4 bg-slate-100 rounded w-3/4 animate-pulse" />
-                 <div className="h-4 bg-slate-100 rounded w-1/2 animate-pulse" />
-               </div>
-             ))}
-           </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((n) => (
+              <div
+                key={n}
+                className="bg-white rounded-2xl p-4 border border-slate-200 space-y-4"
+              >
+                <div className="h-48 bg-slate-100 rounded-xl animate-pulse" />
+                <div className="h-4 bg-slate-100 rounded w-3/4 animate-pulse" />
+                <div className="h-4 bg-slate-100 rounded w-1/2 animate-pulse" />
+              </div>
+            ))}
+          </div>
         ) : filteredPosts.length === 0 ? (
-          <motion.div 
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             className="text-center py-20 bg-white border border-dashed border-slate-300 rounded-xl"
           >
-             <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
-               <Search size={32} />
-             </div>
-             <h3 className="text-slate-900 font-bold text-lg">No items found</h3>
-             <p className="text-slate-500 text-sm mt-1">Try adjusting your filters to see more results.</p>
-             <button 
-              onClick={() => {setSearchTerm(''); setFilter('all');}}
+            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
+              <Search size={32} />
+            </div>
+            <h3 className="text-slate-900 font-bold text-lg">No items found</h3>
+            <p className="text-slate-500 text-sm mt-1">
+              Try adjusting your filters to see more results.
+            </p>
+            <button
+              onClick={() => {
+                setSearchTerm("");
+                setFilter("all");
+              }}
               className="mt-4 text-blue-600 hover:text-blue-800 text-sm font-medium"
-             >
-               Clear all filters
-             </button>
+            >
+              Clear all filters
+            </button>
           </motion.div>
         ) : (
-          <motion.div layout className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'flex flex-col gap-4'}>
+          <motion.div
+            layout
+            className={
+              viewMode === "grid"
+                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                : "flex flex-col gap-4"
+            }
+          >
             <AnimatePresence>
               {filteredPosts.map((post) => (
                 <motion.div
@@ -448,37 +513,53 @@ export default function DashboardPage() {
                   exit={{ opacity: 0, scale: 0.95 }}
                   key={`${post.type}-${post.id}`}
                   className={`group bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-slate-200/50 hover:border-blue-200 transition-all duration-300 ${
-                    viewMode === 'list' ? 'flex flex-row items-center h-40' : 'flex flex-col'
+                    viewMode === "list"
+                      ? "flex flex-row items-center h-40"
+                      : "flex flex-col"
                   }`}
                 >
                   {/* Card Image */}
-                  <div className={`relative overflow-hidden bg-slate-100 ${viewMode === 'list' ? 'w-48 h-full shrink-0' : 'h-48 w-full'}`}>
+                  <div
+                    className={`relative overflow-hidden bg-slate-100 ${viewMode === "list" ? "w-48 h-full shrink-0" : "h-48 w-full"}`}
+                  >
                     {post.imageUrl ? (
-                      <img src={post.imageUrl} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" alt={post.title} />
+                      <img
+                        src={post.imageUrl}
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                        alt={post.title}
+                      />
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center text-slate-300">
                         <Box size={40} strokeWidth={1} />
-                        <span className="text-xs font-medium mt-2">No Image</span>
+                        <span className="text-xs font-medium mt-2">
+                          No Image
+                        </span>
                       </div>
                     )}
-                    
+
                     {/* Status Badge */}
                     <div className="absolute top-3 left-3 flex gap-2">
-                      <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide border shadow-sm backdrop-blur-md ${
-                        post.type === 'lost' 
-                          ? 'bg-white/90 text-rose-600 border-rose-100' 
-                          : 'bg-white/90 text-emerald-600 border-emerald-100'
-                      }`}>
+                      <span
+                        className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide border shadow-sm backdrop-blur-md ${
+                          post.type === "lost"
+                            ? "bg-white/90 text-rose-600 border-rose-100"
+                            : "bg-white/90 text-emerald-600 border-emerald-100"
+                        }`}
+                      >
                         {post.type}
                       </span>
                     </div>
 
                     {/* Match Score Badge */}
                     {post.matchScore && (
-                       <div className="absolute bottom-3 right-3 px-2 py-1 bg-slate-900/90 backdrop-blur-sm text-white text-xs font-bold rounded flex items-center gap-1 shadow-lg">
-                         <Zap size={10} className="text-yellow-400" fill="currentColor" />
-                         {post.matchScore}% MATCH
-                       </div>
+                      <div className="absolute bottom-3 right-3 px-2 py-1 bg-slate-900/90 backdrop-blur-sm text-white text-xs font-bold rounded flex items-center gap-1 shadow-lg">
+                        <Zap
+                          size={10}
+                          className="text-yellow-400"
+                          fill="currentColor"
+                        />
+                        {post.matchScore}% MATCH
+                      </div>
                     )}
                   </div>
 
@@ -488,24 +569,32 @@ export default function DashboardPage() {
                       <h3 className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1 text-base">
                         {post.title}
                       </h3>
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold border uppercase shrink-0 ${
-                         post.status === 'resolved' ? 'bg-green-50 text-green-700 border-green-100' :
-                         post.status === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-100' :
-                         'bg-blue-50 text-blue-700 border-blue-100'
-                      }`}>
+                      <span
+                        className={`px-2 py-0.5 rounded text-[10px] font-bold border uppercase shrink-0 ${
+                          post.status === "resolved"
+                            ? "bg-green-50 text-green-700 border-green-100"
+                            : post.status === "pending"
+                              ? "bg-amber-50 text-amber-700 border-amber-100"
+                              : "bg-blue-50 text-blue-700 border-blue-100"
+                        }`}
+                      >
                         {post.status}
                       </span>
                     </div>
-                    
-                    <p className={`text-sm text-slate-500 mb-4 ${viewMode === 'list' ? 'line-clamp-2' : 'line-clamp-2'}`}>
+
+                    <p
+                      className={`text-sm text-slate-500 mb-4 ${viewMode === "list" ? "line-clamp-2" : "line-clamp-2"}`}
+                    >
                       {post.description}
                     </p>
-                    
+
                     <div className="mt-auto flex items-center justify-between pt-4 border-t border-slate-100">
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-1.5 text-xs text-slate-500">
                           <MapPin size={12} className="text-slate-400" />
-                          <span className="truncate max-w-[120px]">{post.location}</span>
+                          <span className="truncate max-w-[120px]">
+                            {post.location}
+                          </span>
                         </div>
                         <div className="flex items-center gap-1.5 text-xs text-slate-400">
                           <Clock size={12} />
