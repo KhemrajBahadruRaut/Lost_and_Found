@@ -50,7 +50,7 @@ export default function FoundUserConfirmationModal({
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4">
+        <div className="bg-linear-to-r from-green-500 to-green-600 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Eye className="text-white" size={24} />
@@ -71,7 +71,7 @@ export default function FoundUserConfirmationModal({
 
         {/* Info */}
         <div className="mx-6 mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-3">
-          <MapPin className="text-blue-600 flex-shrink-0 mt-0.5" size={18} />
+          <MapPin className="text-blue-600 shrink-0 mt-0.5" size={18} />
           <p className="text-sm text-blue-800">
             Please provide details about where and how you found this item. This helps the admin verify 
             the rightful owner. Your observations will be compared with the owner's claims.
@@ -179,7 +179,7 @@ export default function FoundUserConfirmationModal({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-3 bg-linear-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all font-medium disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>
